@@ -5,18 +5,12 @@ import com.example.whisper.entity.Message;
 import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.criteria.Predicate;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("chats")
@@ -24,6 +18,7 @@ import java.util.UUID;
 public class ChatController {
 
     private final MessageRepository messageRepository;
+
     private final CustomerRepository customerRepository;
 
     @GetMapping()
@@ -35,7 +30,9 @@ public class ChatController {
 
     @GetMapping("{id}/participants")
     public List<Customer> getParticipants(@PathVariable("id") UUID chatId) {
-        List<UUID> participants = messageRepository.findParticipants(chatId);
+        List<Message> messages = messageRepository.findParticipants(chatId, Message.MessageType.iam);
+        List<UUID> participants = messages.stream().map(Message::getSender).collect(Collectors.toList());
+        System.out.println(messages);
         if(participants.isEmpty()) {
             return new ArrayList<>();
         } else {

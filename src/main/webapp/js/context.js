@@ -73,6 +73,7 @@ function initContext() {
                     publicKey: keyPair.publicKey,
                     secretKey: keyPair.secretKey
                 }
+                console.log(context.user.publicKey);
                 Rest.doPost("/customers", {pk: context.user.publicKey.join(",")}).then(function(response) {
                     context.user.id = response.id;
                     context.users[context.user.id] = context.user;
@@ -148,12 +149,13 @@ function initContext() {
                                             .map(function(str) {
                                                 return parseInt(str);
                                             }));
-                                        var test = fromStringToUint8("test");
+
+                                        var test = stringToUint8("test");
                                         var nonce = new Uint8Array(24);
                                         self.crypto.getRandomValues(nonce)
                                         var encrypted = nacl.box(test, nonce, publicKey, privateKey);
                                         var decrypted = nacl.box.open(encrypted, nonce, publicKey, privateKey);
-                                        if("test" === fromUint8ToString(decrypted)) {
+                                        if("test" === uint8ToString(decrypted)) {
                                             context.user = {
                                                 id: user.id,
                                                 publicKey: publicKey,

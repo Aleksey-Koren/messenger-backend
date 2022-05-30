@@ -15,6 +15,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID>, JpaSpec
     @Query("select distinct message.chat from Message message where message.receiver = :receiver")
     List<UUID> findChats(@Param("receiver") UUID receiver);
 
-    @Query("select distinct message.receiver from Message message where message.chat = :chat")
-    List<UUID> findParticipants(@Param("chat") UUID chat);
+
+    @Query("select message from Message message where (message.chat = :chat and message.type = :messageType)")
+    List<Message> findParticipants(@Param("chat") UUID chat, @Param("messageType")Message.MessageType messageType);
 }

@@ -59,6 +59,7 @@
                     return Rest.doGet("messages?receiver=" + context.user.id + "&chat=" + chatId)
                 }).then(function(messages) {
                     context.chats[chatId].messages = messages;
+                    console.log(context);
                     messages.forEach(function(message) {
                         ui.addMessage({
                             sender: message.sender,
