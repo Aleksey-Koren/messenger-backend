@@ -1,0 +1,77 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+div, textarea, button {
+    box-sizing: border-box;
+}
+#application {
+    width: 100%;
+    height: 100%;
+}
+.ui-messages {
+    width: 75%;
+    height: 80%;
+    top: 0;
+    right: 0;
+    position: fixed;
+}
+.ui-input {
+    width: 55%;
+    height: 20%;
+    bottom: 0;
+    right: 20%;
+    position: fixed;
+}
+.ui-send-message {
+    width: 20%;
+    height: 20%;
+    bottom: 0;
+    right: 0;
+    position: fixed;
+}
+.ui-sidebar {
+    width: 23%;
+    height: 100%;
+    margin-right: 2%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    border-right: 1px solid black
+}
+
+
+
+.component-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4;
+    background: black;
+    z-index: 100;
+}
+.component-popup {
+    position: fixed;
+    top: 200px;
+    left: 50%;
+    width: 400px;
+    margin-left: -200px;
+    border: 1px solid black;
+    background: white;
+    z-index: 200;
+}
+.ui-chat {
+    border-bottom: 1px solid black;
+    padding: 10px 10px;
+    margin-bottom: 10px;
+}
+.ui-chat-selected {
+    font-weight: bold;
+}
+.ui-chat:last-child {
+    border-bottom: none;
+}
