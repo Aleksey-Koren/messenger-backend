@@ -27,7 +27,7 @@ public class MessageController {
     private Long messageLifespan;
 
 
-    @PostMapping
+    @PutMapping
     public ResponseEntity<List<Message>> sendMessage(@RequestBody List<Message> messages) {
         List<Message> out = new ArrayList<>();
         for(Message message : messages) {

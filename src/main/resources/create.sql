@@ -1,5 +1,5 @@
 create table message (
-    id uuid,
+    id UUID,
     sender uuid,
     receiver uuid,
     chat uuid,
@@ -13,7 +13,7 @@ create index receiver_idx on message (receiver);
 create index chat_idx on message (chat);
 
 create table customer (
-     id uuid,
-     pk text,
+     id UUID,
+     public_key text,
      primary key (id)
 );
