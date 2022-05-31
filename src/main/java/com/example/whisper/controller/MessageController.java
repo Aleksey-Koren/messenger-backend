@@ -2,6 +2,7 @@ package com.example.whisper.controller;
 
 import com.example.whisper.entity.Message;
 import com.example.whisper.repository.MessageRepository;
+import com.example.whisper.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class MessageController {
 
     private final MessageRepository messageRepository;
+    private final MessageService messageService;
 
     @Value("${message.lifespan:86400000}")
     private Long messageLifespan;
@@ -29,22 +31,7 @@ public class MessageController {
 
     @PutMapping
     public ResponseEntity<List<Message>> sendMessage(@RequestBody List<Message> messages) {
-        List<Message> out = new ArrayList<>();
-        for(Message message : messages) {
-            message.setId(UUID.randomUUID());
-            message.setCreated(Instant.now());
-            if (isEmpty(message.getSender())
-                    || isEmpty(message.getReceiver())
-                    || message.getType() == null
-                    || isEmpty(message.getData())) {
-                return ResponseEntity.badRequest().build();
-            }
-            if (message.getChat() == null) {
-                message.setChat(UUID.randomUUID());
-            }
-            out.add(messageRepository.save(message));
-        }
-        return ResponseEntity.ok(out);
+        return messageService.sendMessage(messages);
     }
 
     @GetMapping()
@@ -75,14 +62,4 @@ public class MessageController {
                         Instant.now().minus(messageLifespan, ChronoUnit.MILLIS)
         )));
     }
-
-
-
-    private boolean isEmpty(String str) {
-        return str == null || "".equals(str);
-    }
-    private boolean isEmpty(UUID uuid) {
-        return uuid == null;
-    }
-
 }

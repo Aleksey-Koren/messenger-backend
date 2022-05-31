@@ -25,14 +25,16 @@ public class ChatController {
     public List<UUID> getChats(
             @RequestParam ("receiver") UUID receiver
     ) {
-        return messageRepository.findChats(receiver);
+        List<UUID> chats = messageRepository.findChats(receiver, Message.MessageType.hello);
+        System.out.println("Chats:");
+        chats.forEach(System.out::println);
+        return messageRepository.findChats(receiver, Message.MessageType.hello );
     }
 
     @GetMapping("{id}/participants")
     public List<Customer> getParticipants(@PathVariable("id") UUID chatId) {
-        List<Message> messages = messageRepository.findParticipants(chatId, Message.MessageType.iam);
+        List<Message> messages = messageRepository.findAllByChatAndType(chatId, Message.MessageType.iam);
         List<UUID> participants = messages.stream().map(Message::getSender).collect(Collectors.toList());
-        System.out.println(messages);
         if(participants.isEmpty()) {
             return new ArrayList<>();
         } else {
