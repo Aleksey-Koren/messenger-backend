@@ -22,12 +22,8 @@ public class ChatController {
     private final CustomerRepository customerRepository;
 
     @GetMapping()
-    public List<UUID> getChats(
-            @RequestParam ("receiver") UUID receiver
-    ) {
-        List<UUID> chats = messageRepository.findChats(receiver, Message.MessageType.hello);
-        System.out.println("Chats:");
-        chats.forEach(System.out::println);
+    public List<UUID> getChats(@RequestParam ("receiver") UUID receiver) {
+
         return messageRepository.findChats(receiver, Message.MessageType.hello );
     }
 
