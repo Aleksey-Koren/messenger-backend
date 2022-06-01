@@ -44,8 +44,14 @@ public class MessageService {
             return ResponseEntity.ok(messageRepository.saveAll(messages));
         }
 
+
+
         log.warn("Unknown type of message");
         return ResponseEntity.badRequest().build();
+    }
+
+    public List<Message> findChats(UUID receiver) {
+        return messageRepository.findChats(receiver, Message.MessageType.hello);
     }
 
     private void setInstantData(List<Message> messages) {
