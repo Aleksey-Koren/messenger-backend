@@ -4,6 +4,7 @@ import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Message;
 import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.MessageRepository;
+import com.example.whisper.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,13 +19,12 @@ import java.util.stream.Collectors;
 public class ChatController {
 
     private final MessageRepository messageRepository;
-
     private final CustomerRepository customerRepository;
+    private final MessageService messageService;
 
     @GetMapping()
-    public List<UUID> getChats(@RequestParam ("receiver") UUID receiver) {
-
-        return messageRepository.findChats(receiver, Message.MessageType.hello );
+    public List<Message> getChats(@RequestParam ("receiver") UUID receiver) {
+        return messageService.findChats(receiver);
     }
 
     @GetMapping("{id}/participants")
