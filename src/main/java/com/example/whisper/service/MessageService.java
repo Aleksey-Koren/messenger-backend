@@ -8,8 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +29,24 @@ public class MessageService {
         setInstantData(messages);
 
         if(Message.MessageType.whisper.equals(messages.get(0).getType())) {
-            messageRepository.saveAll(messages);
+            List<Message> messageList = messages;
+            return ResponseEntity.ok(messageRepository.saveAll(messageList));
+        }
+
+        if(Message.MessageType.who.equals(messages.get(0).getType())) {
+            Message incoming = messages.get(0);
+            List<Message> mess = messageRepository.findByChatAndSenderAndReceiverAndType(
+                    incoming.getChat(),
+                    incoming.getSender(),
+                    incoming.getReceiver(),
+                    incoming.getType()
+            );
+
+            if(mess.size() != 0) {
+                return ResponseEntity.ok(new ArrayList<>());
+            } else {
+                return ResponseEntity.ok(messageRepository.saveAll(messages));
+            }
         }
 
         if(Message.MessageType.hello.equals(messages.get(0).getType())) {
@@ -38,13 +57,21 @@ public class MessageService {
         }
 
         if(Message.MessageType.iam.equals(messages.get(0).getType())) {
+            Message incoming = messages.get(0);
+            List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
             UUID chat = messages.get(0).getChat();
             UUID sender = messages.get(0).getSender();
+
+            messageRepository.deleteAllByChatAndSenderInAndReceiverAndType(
+                    incoming.getChat(),
+                    receivers,
+                    incoming.getSender(),
+                    Message.MessageType.who);
+
             messageRepository.deleteAllByChatAndSenderAndType(chat, sender, Message.MessageType.iam);
+
             return ResponseEntity.ok(messageRepository.saveAll(messages));
         }
-
-
 
         log.warn("Unknown type of message");
         return ResponseEntity.badRequest().build();

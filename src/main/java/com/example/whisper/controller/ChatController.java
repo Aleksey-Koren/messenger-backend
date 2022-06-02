@@ -29,8 +29,8 @@ public class ChatController {
 
     @GetMapping("{id}/participants")
     public List<Customer> getParticipants(@PathVariable("id") UUID chatId) {
-        List<Message> messages = messageRepository.findAllByChatAndType(chatId, Message.MessageType.iam);
-        List<UUID> participants = messages.stream().map(Message::getSender).collect(Collectors.toList());
+        List<Message> messages = messageRepository.findAllByChatAndType(chatId, Message.MessageType.hello);
+        List<UUID> participants = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
         if(participants.isEmpty()) {
             return new ArrayList<>();
         } else {
