@@ -68,8 +68,6 @@ public class MessageService {
                     incoming.getSender(),
                     Message.MessageType.who);
 
-            messageRepository.deleteAllByChatAndSenderAndType(chat, sender, Message.MessageType.iam);
-
             return ResponseEntity.ok(messageRepository.saveAll(messages));
         }
 
