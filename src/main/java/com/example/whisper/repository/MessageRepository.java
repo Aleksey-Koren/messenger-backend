@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface MessageRepository extends JpaRepository<Message, UUID>, JpaSpecificationExecutor<Message> {
@@ -18,6 +17,8 @@ public interface MessageRepository extends JpaRepository<Message, UUID>, JpaSpec
 
     @Query("select message from Message message where (message.chat = :chat and message.type = :messageType)")
     List<Message> findAllByChatAndType(@Param("chat") UUID chat, @Param("messageType")Message.MessageType messageType);
+
+    List<Message> findAllByChatAndTypeAndAndReceiverIn(UUID chat, Message.MessageType type, List<UUID> receiver);
 
     void deleteAllByChatAndSenderAndType(UUID chat, UUID sender, Message.MessageType type);
 

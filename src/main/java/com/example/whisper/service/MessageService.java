@@ -28,6 +28,8 @@ public class MessageService {
 
         setInstantData(messages);
 
+        Message commonData = messages.get(0);
+
         if(Message.MessageType.whisper.equals(messages.get(0).getType())) {
             List<Message> messageList = messages;
             return ResponseEntity.ok(messageRepository.saveAll(messageList));
@@ -49,10 +51,11 @@ public class MessageService {
             }
         }
 
-        if(Message.MessageType.hello.equals(messages.get(0).getType())) {
-            List<Message> helloMessages = messageRepository.findAllByChatAndType(messages.get(0).getChat(), Message.MessageType.hello);
+        if(Message.MessageType.hello.equals(commonData.getType())) {
+            List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
+            List<Message> toDelete = messageRepository.findAllByChatAndTypeAndAndReceiverIn(commonData.getChat(), Message.MessageType.hello, receivers);
             //todo deleteAllByChatAndType
-            messageRepository.deleteAll(helloMessages);
+            messageRepository.deleteAll(toDelete);
             return ResponseEntity.ok(messageRepository.saveAll(messages));
         }
 
