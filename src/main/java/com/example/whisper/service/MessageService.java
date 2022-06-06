@@ -86,6 +86,7 @@ public class MessageService {
         }
         Message commonData = messages.get(0);
         messageRepository.deleteAllBySenderAndType(commonData.getSender(), Message.MessageType.iam);
+        setInstantData(messages);
         messageRepository.saveAll(messages);
     }
 
@@ -126,8 +127,8 @@ public class MessageService {
 
     private boolean areFieldsCorrect(List<Message> messages) {
         Message oneFromAll = messages.get(0);
-        for(Message message : messages) {
-            if(isEmpty(
+        for (Message message : messages) {
+            if (isEmpty(
                     message.getSender()) ||
                     isEmpty(message.getReceiver()) ||
                     message.getType() == null ||
@@ -143,13 +144,12 @@ public class MessageService {
 
     private boolean areFieldsCorrectUpdateTitle(List<Message> messages) {
         Message oneFromAll = messages.get(0);
-        for(Message message : messages) {
-            if(isEmpty(
-                    message.getSender()) ||
+        for (Message message : messages) {
+            if (isEmpty(message.getSender()) ||
                     isEmpty(message.getReceiver()) ||
                     message.getType() == null ||
                     isEmpty(message.getData()) ||
-                    message.getSender() != oneFromAll.getSender()
+                    !message.getSender().equals(oneFromAll.getSender())
             ) {
                 return false;
             }
