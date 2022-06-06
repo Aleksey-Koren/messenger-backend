@@ -32,4 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
-
+### eclipse project file ###
+.settings/
+.classpath
+.project
+bin/
