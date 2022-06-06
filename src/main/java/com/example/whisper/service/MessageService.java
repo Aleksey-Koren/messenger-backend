@@ -30,21 +30,21 @@ public class MessageService {
 
         Message commonData = messages.get(0);
 
-        if(Message.MessageType.whisper.equals(messages.get(0).getType())) {
+        if(Message.MessageType.whisper.equals(commonData.getType())) {
             List<Message> messageList = messages;
             return ResponseEntity.ok(messageRepository.saveAll(messageList));
         }
 
-        if(Message.MessageType.who.equals(messages.get(0).getType())) {
-            Message incoming = messages.get(0);
+        if(Message.MessageType.who.equals(commonData.getType())) {
+
             List<Message> mess = messageRepository.findByChatAndSenderAndReceiverAndType(
-                    incoming.getChat(),
-                    incoming.getSender(),
-                    incoming.getReceiver(),
-                    incoming.getType()
+                    commonData.getChat(),
+                    commonData.getSender(),
+                    commonData.getReceiver(),
+                    commonData.getType()
             );
 
-            if(mess.size() != 0) {
+            if(!mess.isEmpty()) {
                 return ResponseEntity.ok(new ArrayList<>());
             } else {
                 return ResponseEntity.ok(messageRepository.saveAll(messages));
@@ -53,22 +53,20 @@ public class MessageService {
 
         if(Message.MessageType.hello.equals(commonData.getType())) {
             List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
-            List<Message> toDelete = messageRepository.findAllByChatAndTypeAndAndReceiverIn(commonData.getChat(), Message.MessageType.hello, receivers);
+            List<Message> helloMessages = messageRepository.findAllByChatAndTypeAndAndReceiverIn(commonData.getChat(), Message.MessageType.hello, receivers);
             //todo deleteAllByChatAndType
-            messageRepository.deleteAll(toDelete);
+            messageRepository.deleteAll(helloMessages);
             return ResponseEntity.ok(messageRepository.saveAll(messages));
         }
 
-        if(Message.MessageType.iam.equals(messages.get(0).getType())) {
-            Message incoming = messages.get(0);
+        if(Message.MessageType.iam.equals(commonData.getType())) {
             List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
-            UUID chat = messages.get(0).getChat();
-            UUID sender = messages.get(0).getSender();
 
             messageRepository.deleteAllByChatAndSenderInAndReceiverAndType(
-                    incoming.getChat(),
+
+                    commonData.getChat(),
                     receivers,
-                    incoming.getSender(),
+                    commonData.getSender(),
                     Message.MessageType.who);
 
             return ResponseEntity.ok(messageRepository.saveAll(messages));
@@ -113,12 +111,12 @@ public class MessageService {
             }
         }
 
-        Message oneFromAll = messages.get(0);
+        Message commonData = messages.get(0);
 
-        if(oneFromAll.getChat() == null) {
-            return hasTheSameSenderAndChatDoesntExist(messages, oneFromAll);
+        if(commonData.getChat() == null) {
+            return hasTheSameSenderAndChatDoesntExist(messages, commonData);
         } else {
-            return hasTheSameSenderAndChat(messages, oneFromAll);
+            return hasTheSameSenderAndChat(messages, commonData);
         }
     }
 
