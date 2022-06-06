@@ -36,6 +36,12 @@ public class MessageController {
         return messageService.sendMessage(messages);
     }
 
+    @PutMapping("/title")
+    @Transactional
+    public void changeUserTitle(@RequestBody List<Message> messages) {
+        messageService.updateUserTitle(messages);
+    }
+
     @GetMapping()
     public List<Message> getMessages(
             @RequestParam ("receiver") UUID receiver,

@@ -25,4 +25,6 @@ public interface MessageRepository extends JpaRepository<Message, UUID>, JpaSpec
     List<Message> findByChatAndSenderAndReceiverAndType(UUID chat, UUID sender, UUID receiver, Message.MessageType type);
 
     void deleteAllByChatAndSenderInAndReceiverAndType(UUID chat, List<UUID> sender, UUID receiver, Message.MessageType type);
+
+    void deleteAllBySenderAndType(UUID sender, Message.MessageType type);
 }
