@@ -133,7 +133,7 @@ public class MessageService {
                     isEmpty(message.getReceiver()) ||
                     message.getType() == null ||
                     isEmpty(message.getData()) ||
-                    message.getSender() != oneFromAll.getSender() ||
+                    !message.getSender().equals(oneFromAll.getSender()) ||
                     oneFromAll.getSender() == null ? message.getSender() != null : !oneFromAll.getSender().equals(message.getSender())
             ) {
                 return false;
