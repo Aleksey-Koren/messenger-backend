@@ -128,8 +128,7 @@ public class MessageService {
     private boolean areFieldsCorrect(List<Message> messages) {
         Message oneFromAll = messages.get(0);
         for (Message message : messages) {
-            if (isEmpty(
-                    message.getSender()) ||
+            if (isEmpty(message.getSender()) ||
                     isEmpty(message.getReceiver()) ||
                     message.getType() == null ||
                     isEmpty(message.getData()) ||
