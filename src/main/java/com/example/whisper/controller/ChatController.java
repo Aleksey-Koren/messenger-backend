@@ -34,7 +34,7 @@ public class ChatController {
         if(participants.isEmpty()) {
             return new ArrayList<>();
         } else {
-            return customerRepository.findAll(((root, query, criteriaBuilder) -> root.get("id").in(participants)));
+            return customerRepository.findAllById(participants);
         }
     }
 }

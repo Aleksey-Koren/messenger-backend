@@ -3,7 +3,7 @@ create table message (
     sender uuid,
     receiver uuid,
     chat uuid,
-    type text,
+    type integer,
     data text,
     nonce text,
     created timestamp,

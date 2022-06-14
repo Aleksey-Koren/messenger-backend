@@ -30,7 +30,7 @@ public class MessageController {
     private Long messageLifespan;
 
 
-    @PutMapping
+    @PostMapping
     @Transactional
     public ResponseEntity<List<Message>> sendMessage(@RequestBody List<Message> messages) {
         return messageService.sendMessage(messages);
@@ -49,7 +49,7 @@ public class MessageController {
             @RequestParam(name = "chat", required = false) UUID chat
     ) {
 
-        List<Message> all = messageRepository.findAll(((root, query, criteriaBuilder) -> {
+        return messageRepository.findAll(((root, query, criteriaBuilder) -> {
             Predicate where = criteriaBuilder.and(
                     criteriaBuilder.equal(root.get("receiver"), receiver),
                     criteriaBuilder.equal(root.get("chat"), chat)
@@ -61,8 +61,6 @@ public class MessageController {
             query.orderBy(criteriaBuilder.asc(root.get("created")));
             return where;
         }));
-
-        return  all;
     }
 
 

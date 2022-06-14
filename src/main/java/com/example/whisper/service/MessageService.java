@@ -108,20 +108,20 @@ public class MessageService {
     }
 
     private boolean isValid(List<Message> messages) {
-        if (isNotExist(messages)) {
+        if (isEmpty(messages)) {
             return false;
         }
         return areFieldsCorrect(messages);
     }
 
     private boolean isValidUpdateTitle(List<Message> messages) {
-        if (isNotExist(messages)) {
+        if (isEmpty(messages)) {
             return false;
         }
         return areFieldsCorrectUpdateTitle(messages);
     }
 
-    private boolean isNotExist(List<Message> messages) {
+    private boolean isEmpty(List<Message> messages) {
         return messages == null || messages.isEmpty();
     }
 
