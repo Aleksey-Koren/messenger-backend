@@ -21,6 +21,7 @@ import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,6 +40,13 @@ public class CustomerController {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(customerRepository.save(customer));
+    }
+
+    @GetMapping
+    public List<Customer> getCustomers(
+            @RequestParam ("id") List<UUID> id
+    ) {
+        return customerRepository.findAllById(id);
     }
 
     @GetMapping("{id}")

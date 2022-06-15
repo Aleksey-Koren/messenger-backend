@@ -22,7 +22,7 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
 
-    public ResponseEntity<List<Message>> sendMessage(List<Message> messages) {
+    public ResponseEntity<List<Message>> sendMessage(List<Message> messages, UUID iam) {
 
         if (!isValid(messages)) {
             return ResponseEntity.badRequest().build();
@@ -31,12 +31,10 @@ public class MessageService {
         setInstantData(messages);
 
         Message commonData = messages.get(0);
-
+        List<Message> out;
         if (Message.MessageType.whisper.equals(commonData.getType())) {
-            return ResponseEntity.ok(messageRepository.saveAll(messages));
-        }
-
-        if (Message.MessageType.who.equals(commonData.getType())) {
+            out = messageRepository.saveAll(messages);
+        } else if (Message.MessageType.who.equals(commonData.getType())) {
 
             List<Message> mess = messageRepository.findByChatAndSenderAndReceiverAndType(
                     commonData.getChat(),
@@ -46,20 +44,16 @@ public class MessageService {
             );
 
             if (!mess.isEmpty()) {
-                return ResponseEntity.ok(new ArrayList<>());
+                out = new ArrayList<>();
             } else {
-                return ResponseEntity.ok(messageRepository.saveAll(messages));
+                out = messageRepository.saveAll(messages);
             }
-        }
-
-        if (Message.MessageType.hello.equals(commonData.getType())) {
+        } else if (Message.MessageType.hello.equals(commonData.getType())) {
             List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
             List<Message> helloMessages = messageRepository.findAllByChatAndTypeAndAndReceiverIn(commonData.getChat(), Message.MessageType.hello, receivers);
             messageRepository.deleteAll(helloMessages);
-            return ResponseEntity.ok(messageRepository.saveAll(messages));
-        }
-
-        if (Message.MessageType.iam.equals(commonData.getType())) {
+            out = messageRepository.saveAll(messages);
+        } else if (Message.MessageType.iam.equals(commonData.getType())) {
             List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
 
             messageRepository.deleteAllByChatAndSenderInAndReceiverAndType(
@@ -69,25 +63,29 @@ public class MessageService {
                     commonData.getSender(),
                     Message.MessageType.who);
 
-            return ResponseEntity.ok(messageRepository.saveAll(messages));
+            out = messageRepository.saveAll(messages);
+        } else {
+            out = new ArrayList<>();
+            log.warn("Unknown type of message");
+            ResponseEntity.badRequest().build();
         }
-
-        log.warn("Unknown type of message");
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(out.stream()
+                .filter(message -> message.getSender().equals(iam))
+                .collect(Collectors.toList()));
     }
 
     public List<Message> findChats(UUID receiver) {
         return messageRepository.findChats(receiver, Message.MessageType.hello);
     }
 
-    public void updateUserTitle(List<Message> messages) {
+    public List<Message> updateUserTitle(List<Message> messages) {
         if (!isValidUpdateTitle(messages)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         Message commonData = messages.get(0);
         messageRepository.deleteAllBySenderAndType(commonData.getSender(), Message.MessageType.iam);
         setInstantData(messages);
-        messageRepository.saveAll(messages);
+        return messageRepository.saveAll(messages);
     }
 
     private void setInstantData(List<Message> messages) {
@@ -131,7 +129,10 @@ public class MessageService {
             if (isEmpty(message.getSender()) ||
                     isEmpty(message.getReceiver()) ||
                     message.getType() == null ||
-                    isEmpty(message.getData()) ||
+                    (
+                            !(Message.MessageType.hello.equals(message.getType())
+                                    || Message.MessageType.who.equals(message.getType()))
+                                    && isEmpty(message.getData())) ||
                     !message.getSender().equals(oneFromAll.getSender()) ||
                     oneFromAll.getChat() == null ? message.getChat() != null : !oneFromAll.getChat().equals(message.getChat())
             ) {
