@@ -2,6 +2,7 @@ package com.example.whisper.controller;
 
 import com.example.whisper.entity.Customer;
 import com.example.whisper.repository.CustomerRepository;
+import com.example.whisper.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,7 @@ import java.util.UUID;
 public class CustomerController {
 
     private final CustomerRepository customerRepository;
+    private final MessageRepository messageRepository;
 
     @PostMapping
     public ResponseEntity<Customer> register(@RequestBody Customer customer) {
@@ -77,6 +79,7 @@ public class CustomerController {
             byte[] decryptedMessageBytes = decryptCipher.doFinal(bytes);
             UUID decryptedMessage = UUID.fromString(new String(decryptedMessageBytes, StandardCharsets.UTF_8));
             if(decryptedMessage.equals(db.getId())) {
+                messageRepository.deleteMyMessages(customer.getId());
                 customerRepository.delete(db);
                 return ResponseEntity.noContent().build();
             } else {

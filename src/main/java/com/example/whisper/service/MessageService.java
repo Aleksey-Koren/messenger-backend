@@ -30,17 +30,17 @@ public class MessageService {
 
         setInstantData(messages);
 
-        Message commonData = messages.get(0);
+        Message controlMessage = messages.get(0);
         List<Message> out;
-        if (Message.MessageType.whisper.equals(commonData.getType())) {
+        if (Message.MessageType.whisper.equals(controlMessage.getType())) {
             out = messageRepository.saveAll(messages);
-        } else if (Message.MessageType.who.equals(commonData.getType())) {
+        } else if (Message.MessageType.who.equals(controlMessage.getType())) {
 
             List<Message> mess = messageRepository.findByChatAndSenderAndReceiverAndType(
-                    commonData.getChat(),
-                    commonData.getSender(),
-                    commonData.getReceiver(),
-                    commonData.getType()
+                    controlMessage.getChat(),
+                    controlMessage.getSender(),
+                    controlMessage.getReceiver(),
+                    controlMessage.getType()
             );
 
             if (!mess.isEmpty()) {
@@ -48,19 +48,24 @@ public class MessageService {
             } else {
                 out = messageRepository.saveAll(messages);
             }
-        } else if (Message.MessageType.hello.equals(commonData.getType())) {
+        } else if (Message.MessageType.hello.equals(controlMessage.getType())) {
             List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
-            List<Message> helloMessages = messageRepository.findAllByChatAndTypeAndAndReceiverIn(commonData.getChat(), Message.MessageType.hello, receivers);
-            messageRepository.deleteAll(helloMessages);
+            if(!receivers.isEmpty()) {
+                messageRepository.deleteHelloMessages(
+                        controlMessage.getChat(),
+                        Message.MessageType.hello,
+                        receivers
+                );
+            }
             out = messageRepository.saveAll(messages);
-        } else if (Message.MessageType.iam.equals(commonData.getType())) {
+        } else if (Message.MessageType.iam.equals(controlMessage.getType())) {
             List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
 
             messageRepository.deleteAllByChatAndSenderInAndReceiverAndType(
 
-                    commonData.getChat(),
+                    controlMessage.getChat(),
                     receivers,
-                    commonData.getSender(),
+                    controlMessage.getSender(),
                     Message.MessageType.who);
 
             out = messageRepository.saveAll(messages);
@@ -70,7 +75,7 @@ public class MessageService {
             ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(out.stream()
-                .filter(message -> message.getSender().equals(iam))
+                .filter(message -> message.getReceiver().equals(iam))
                 .collect(Collectors.toList()));
     }
 

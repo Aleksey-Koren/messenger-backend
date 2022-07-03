@@ -6,7 +6,6 @@ import com.example.whisper.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.criteria.Predicate;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -60,10 +61,10 @@ public class MessageController {
                     criteriaBuilder.equal(root.get("receiver"), receiver)
             );
             if (chat != null) {
-                where = criteriaBuilder.and(where, criteriaBuilder.greaterThanOrEqualTo(root.get("chat"), chat));
+                where = criteriaBuilder.and(where, criteriaBuilder.equal(root.get("chat"), chat));
             }
             if (type != null) {
-                where = criteriaBuilder.and(where, criteriaBuilder.greaterThanOrEqualTo(root.get("type"), type));
+                where = criteriaBuilder.and(where, criteriaBuilder.equal(root.get("type"), type));
             }
             if (created != null) {
                 where = criteriaBuilder.and(where, criteriaBuilder.greaterThanOrEqualTo(root.get("created"), created));
@@ -77,8 +78,10 @@ public class MessageController {
     @Scheduled(fixedDelayString = "${message.lifespan:86400000}")
     public void deleteOld() {
         messageRepository.deleteAll(messageRepository.findAll((root, query, criteriaBuilder) ->
-                criteriaBuilder.lessThanOrEqualTo(root.get("created"),
-                        Instant.now().minus(messageLifespan, ChronoUnit.MILLIS)
+                criteriaBuilder.and(
+                        criteriaBuilder.lessThanOrEqualTo(
+                                root.get("created"), Instant.now().minus(messageLifespan, ChronoUnit.MILLIS)),
+                        criteriaBuilder.equal(root.get("type"), Message.MessageType.whisper)
         )));
     }
 }

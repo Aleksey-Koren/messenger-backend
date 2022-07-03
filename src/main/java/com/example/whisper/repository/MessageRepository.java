@@ -3,8 +3,10 @@ package com.example.whisper.repository;
 import com.example.whisper.entity.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +20,6 @@ public interface MessageRepository extends JpaRepository<Message, UUID>, JpaSpec
     @Query("select message from Message message where (message.chat = :chat and message.type = :messageType)")
     List<Message> findAllByChatAndType(@Param("chat") UUID chat, @Param("messageType")Message.MessageType messageType);
 
-    List<Message> findAllByChatAndTypeAndAndReceiverIn(UUID chat, Message.MessageType type, List<UUID> receiver);
 
     void deleteAllByChatAndSenderAndType(UUID chat, UUID sender, Message.MessageType type);
 
@@ -27,4 +28,24 @@ public interface MessageRepository extends JpaRepository<Message, UUID>, JpaSpec
     void deleteAllByChatAndSenderInAndReceiverAndType(UUID chat, List<UUID> sender, UUID receiver, Message.MessageType type);
 
     void deleteAllBySenderAndType(UUID sender, Message.MessageType type);
+
+    @Modifying
+    @Transactional
+    @Query("delete from Message message " +
+            " where message.chat = :chat " +
+            " and message.type = :type" +
+            " and message.receiver in (:receivers)")
+    void deleteHelloMessages(UUID chat, Message.MessageType type, List<UUID> receivers);
+
+    @Modifying
+    @Transactional
+    @Query("delete from Message message" +
+            " where message.chat = :chat" +
+            " and (message.receiver = :receiver or message.sender = :sender)")
+    void deleteMyChatMessages(UUID receiver, UUID sender, UUID chat);
+
+    @Modifying
+    @Transactional
+    @Query("delete from Message message where message.receiver = :receiver")
+    void deleteMyMessages(UUID receiver);
 }
