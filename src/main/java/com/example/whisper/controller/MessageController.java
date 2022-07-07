@@ -49,14 +49,14 @@ public class MessageController {
     }
 
     @GetMapping()
-    public Page<Message> getMessages(
+    public List<Message> getMessages(
             @RequestParam ("receiver") UUID receiver,
             @RequestParam(name = "created", required = false) Instant created,
+            @RequestParam(name = "before", required = false) Instant before,
             @RequestParam(name = "type", required = false) Message.MessageType type,
-            @RequestParam(name = "chat", required = false) UUID chat,
-            Pageable pageable
+            @RequestParam(name = "chat", required = false) UUID chat
     ) {
-        return messageRepository.findAll(((root, query, criteriaBuilder) -> {
+        return messageRepository.findAll((root, query, criteriaBuilder) -> {
             Predicate where = criteriaBuilder.and(
                     criteriaBuilder.equal(root.get("receiver"), receiver)
             );
@@ -69,9 +69,12 @@ public class MessageController {
             if (created != null) {
                 where = criteriaBuilder.and(where, criteriaBuilder.greaterThanOrEqualTo(root.get("created"), created));
             }
+            if (before != null) {
+                where = criteriaBuilder.and(where, criteriaBuilder.lessThan(root.get("before"), before));
+            }
             query.orderBy(criteriaBuilder.asc(root.get("created")));
             return where;
-        }), pageable);
+        });
     }
 
 
