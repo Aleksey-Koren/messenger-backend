@@ -70,7 +70,7 @@ public class MessageController {
                 where = criteriaBuilder.and(where, criteriaBuilder.greaterThanOrEqualTo(root.get("created"), created));
             }
             if (before != null) {
-                where = criteriaBuilder.and(where, criteriaBuilder.lessThan(root.get("before"), before));
+                where = criteriaBuilder.and(where, criteriaBuilder.lessThan(root.get("created"), before));
             }
             query.orderBy(criteriaBuilder.asc(root.get("created")));
             return where;
