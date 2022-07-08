@@ -134,10 +134,7 @@ public class MessageService {
             if (isEmpty(message.getSender()) ||
                     isEmpty(message.getReceiver()) ||
                     message.getType() == null ||
-                    (
-                            !(Message.MessageType.hello.equals(message.getType())
-                                    || Message.MessageType.who.equals(message.getType()))
-                                    && isEmpty(message.getData())) ||
+                    (!(Message.MessageType.who.equals(message.getType())) && isEmpty(message.getData())) ||
                     !message.getSender().equals(oneFromAll.getSender()) ||
                     oneFromAll.getChat() == null ? message.getChat() != null : !oneFromAll.getChat().equals(message.getChat())
             ) {
