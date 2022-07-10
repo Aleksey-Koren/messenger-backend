@@ -25,13 +25,9 @@ public class Message {
     }
 
     @Id
-    @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID id;
-    @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID sender;
-    @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID receiver;
-    @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID chat;
 
     @Enumerated(EnumType.ORDINAL)
