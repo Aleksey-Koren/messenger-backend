@@ -16,7 +16,6 @@ import javax.persistence.criteria.Predicate;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -49,12 +48,13 @@ public class MessageController {
     }
 
     @GetMapping()
-    public List<Message> getMessages(
+    public Page<Message> getMessages(
             @RequestParam ("receiver") UUID receiver,
             @RequestParam(name = "created", required = false) Instant created,
             @RequestParam(name = "before", required = false) Instant before,
             @RequestParam(name = "type", required = false) Message.MessageType type,
-            @RequestParam(name = "chat", required = false) UUID chat
+            @RequestParam(name = "chat", required = false) UUID chat,
+            Pageable pageable
     ) {
         return messageRepository.findAll((root, query, criteriaBuilder) -> {
             Predicate where = criteriaBuilder.and(
@@ -74,7 +74,7 @@ public class MessageController {
             }
             query.orderBy(criteriaBuilder.asc(root.get("created")));
             return where;
-        });
+        }, pageable);
     }
 
 
