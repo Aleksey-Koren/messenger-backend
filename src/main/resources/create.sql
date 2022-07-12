@@ -6,7 +6,7 @@ create table message (
     type integer,
     data text,
     nonce text,
-    created timestamp,
+    created timestamp(3),
     primary key (id)
 );
 create index receiver_idx on message (receiver);
