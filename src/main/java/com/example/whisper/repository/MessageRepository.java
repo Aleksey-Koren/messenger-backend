@@ -1,5 +1,6 @@
 package com.example.whisper.repository;
 
+import com.example.whisper.entity.LastMessageCreated;
 import com.example.whisper.entity.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -14,12 +15,14 @@ import java.util.UUID;
 public interface MessageRepository extends JpaRepository<Message, UUID>, JpaSpecificationExecutor<Message> {
 
     @Query("select message from Message message where (message.receiver = :receiver and message.type = :messageType)")
-    List<Message> findChats(@Param("receiver") UUID receiver, @Param("messageType")Message.MessageType messageType);
+    List<Message> findChats(@Param("receiver") UUID receiver, @Param("messageType") Message.MessageType messageType);
 
 
     @Query("select message from Message message where (message.chat = :chat and message.type = :messageType)")
-    List<Message> findAllByChatAndType(@Param("chat") UUID chat, @Param("messageType")Message.MessageType messageType);
+    List<Message> findAllByChatAndType(@Param("chat") UUID chat, @Param("messageType") Message.MessageType messageType);
 
+    @Query(value = "SELECT chat, MAX(created) FROM message WHERE chat IN (:chatsIds) GROUP BY chat", nativeQuery = true)
+    List<LastMessageCreated> findLastMessageCreatedInChats(@Param("chatsIds") List<UUID> chatsIds);
 
     void deleteAllByChatAndSenderAndType(UUID chat, UUID sender, Message.MessageType type);
 

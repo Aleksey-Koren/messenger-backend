@@ -1,5 +1,6 @@
 package com.example.whisper.service;
 
+import com.example.whisper.entity.LastMessageCreated;
 import com.example.whisper.entity.Message;
 import com.example.whisper.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -50,7 +52,7 @@ public class MessageService {
             }
         } else if (Message.MessageType.hello.equals(controlMessage.getType())) {
             List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
-            if(!receivers.isEmpty()) {
+            if (!receivers.isEmpty()) {
                 messageRepository.deleteHelloMessages(
                         controlMessage.getChat(),
                         Message.MessageType.hello,
@@ -80,7 +82,16 @@ public class MessageService {
     }
 
     public List<Message> findChats(UUID receiver) {
-        return messageRepository.findChats(receiver, Message.MessageType.hello);
+        List<Message> chats = messageRepository.findChats(receiver, Message.MessageType.hello);
+        List<UUID> chatsIds = chats.stream().map(Message::getChat).collect(Collectors.toList());
+
+        Map<UUID, Instant> lastMessages = messageRepository.findLastMessageCreatedInChats(chatsIds)
+                .stream()
+                .collect(Collectors.toMap(LastMessageCreated::getChat, LastMessageCreated::getCreated));
+
+        chats.forEach(chat -> chat.setCreated(lastMessages.get(chat.getChat())));
+
+        return chats;
     }
 
     public List<Message> updateUserTitle(List<Message> messages) {
