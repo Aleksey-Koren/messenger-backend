@@ -36,18 +36,12 @@ public class CustomerController {
     private final MessageRepository messageRepository;
 
     @PostMapping
-    public ResponseEntity<Customer> register(@RequestBody Customer customer,
-                                             @RequestParam(value = "ghost", required = false) boolean ghost) {
+    public ResponseEntity<Customer> register(@RequestBody Customer customer) {
         customer.setId(UUID.randomUUID());
         if (isEmpty(customer.getPk())) {
             return ResponseEntity.badRequest().build();
         }
-
-        if (ghost) {
-            return ResponseEntity.ok(customer);
-        } else {
-            return ResponseEntity.ok(customerRepository.save(customer));
-        }
+        return ResponseEntity.ok(customerRepository.save(customer));
     }
 
     @GetMapping
