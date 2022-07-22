@@ -21,7 +21,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID>, JpaSpec
     @Query("select message from Message message where (message.chat = :chat and message.type = :messageType)")
     List<Message> findAllByChatAndType(@Param("chat") UUID chat, @Param("messageType") Message.MessageType messageType);
 
-    @Query(value = "SELECT chat, MAX(created) FROM message WHERE chat IN (:chatsIds) GROUP BY chat", nativeQuery = true)
+    @Query(value = "SELECT chat as chat, MAX(created) as created FROM message WHERE chat IN (:chatsIds) GROUP BY chat", nativeQuery = true)
     List<LastMessageCreated> findLastMessageCreatedInChats(@Param("chatsIds") List<UUID> chatsIds);
 
     void deleteAllByChatAndSenderAndType(UUID chat, UUID sender, Message.MessageType type);
