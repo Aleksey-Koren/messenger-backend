@@ -1,6 +1,8 @@
 package com.example.whisper.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Type;
@@ -16,23 +18,29 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "message")
 @ToString
 public class Message {
 
     public enum MessageType {
-         iam, whisper, hello, who
+        iam, whisper, hello, who
     }
 
     @Id
-    private UUID id;
-    private UUID sender;
-    private UUID receiver;
-    private UUID chat;
+    @Type(type = "org.hibernate.type.UUIDCharType")
+    protected UUID id;
+    @Type(type = "org.hibernate.type.UUIDCharType")
+    protected UUID sender;
+    @Type(type = "org.hibernate.type.UUIDCharType")
+    protected UUID receiver;
+    @Type(type = "org.hibernate.type.UUIDCharType")
+    protected UUID chat;
 
     @Enumerated(EnumType.ORDINAL)
-    private MessageType type;
-    private String data;
-    private String nonce;
-    private Instant created;
+    protected MessageType type;
+    protected String data;
+    protected String nonce;
+    protected Instant created;
 }
