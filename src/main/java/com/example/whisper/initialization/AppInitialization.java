@@ -27,11 +27,7 @@ public class AppInitialization {
         }
 
         if(appProperties.getIsRecreateServerUserNeeded()) {
-            recreateServerUser();
+            initService.recreateServerUser();
         }
-    }
-
-    private void recreateServerUser() {
-        System.out.println("Server user");
     }
 }

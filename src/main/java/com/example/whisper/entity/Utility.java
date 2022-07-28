@@ -22,7 +22,8 @@ public class Utility {
     private String utilValue;
 
     public enum Key {
-        SERVER_USER_SECRET,
+        SERVER_USER_ID,
+        SERVER_USER_SECRET_KEY,
         MESSAGE_LIFESPAN
     }
 }

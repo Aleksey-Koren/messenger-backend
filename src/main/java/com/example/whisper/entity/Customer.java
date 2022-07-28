@@ -1,6 +1,8 @@
 package com.example.whisper.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 
@@ -15,6 +17,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name = "customer")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Customer {
     @Id
     private UUID id;

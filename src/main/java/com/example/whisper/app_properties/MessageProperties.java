@@ -1,6 +1,7 @@
 package com.example.whisper.app_properties;
 
 import com.example.whisper.entity.Utility;
+import com.example.whisper.repository.UtilRepository;
 import com.example.whisper.service.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -13,12 +14,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MessageProperties {
 
-    private final UtilService utilService;
+    private final UtilRepository utilRepository;
 
     private Long lifespan;
 
     public void setLifespanToFieldAndDb(long lifespan) {
-        utilService.save(new Utility(Utility.Key.MESSAGE_LIFESPAN.name(), String.valueOf(lifespan)));
+        utilRepository.save(new Utility(Utility.Key.MESSAGE_LIFESPAN.name(), String.valueOf(lifespan)));
         this.lifespan = lifespan;
     }
 
