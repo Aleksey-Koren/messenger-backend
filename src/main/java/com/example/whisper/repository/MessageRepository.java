@@ -32,6 +32,8 @@ public interface MessageRepository extends JpaRepository<Message, UUID>, JpaSpec
 
     void deleteAllBySenderAndType(UUID sender, Message.MessageType type);
 
+    void deleteAllByReceiverAndChatAndType(UUID receiver, UUID chat, Message.MessageType type);
+
     @Modifying
     @Transactional
     @Query("delete from Message message " +

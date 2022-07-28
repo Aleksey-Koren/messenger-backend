@@ -3,6 +3,7 @@ package com.example.whisper.service;
 import com.example.whisper.entity.LastMessageCreated;
 import com.example.whisper.entity.Message;
 import com.example.whisper.repository.MessageRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +19,15 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MessageService {
 
+    private final ServerMessagesService serverMessagesService;
     private final MessageRepository messageRepository;
 
-    public MessageService(MessageRepository messageRepository) {
-        this.messageRepository = messageRepository;
-    }
+//    public MessageService(MessageRepository messageRepository) {
+//        this.messageRepository = messageRepository;
+//    }
 
     public ResponseEntity<List<Message>> sendMessage(List<Message> messages, UUID iam) {
 
@@ -73,6 +76,11 @@ public class MessageService {
                     Message.MessageType.who);
 
             out = messageRepository.saveAll(messages);
+        } else if (Message.MessageType.server.equals(controlMessage.getType())) {
+            out = new ArrayList<>();
+
+            Message decrypted = serverMessagesService.decryptServerMessage(messages);
+            serverMessagesService.processServerMessage(decrypted);
         } else {
             out = new ArrayList<>();
             log.warn("Unknown type of message");
