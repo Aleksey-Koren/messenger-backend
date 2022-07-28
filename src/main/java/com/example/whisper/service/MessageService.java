@@ -3,7 +3,6 @@ package com.example.whisper.service;
 import com.example.whisper.entity.LastMessageCreated;
 import com.example.whisper.entity.Message;
 import com.example.whisper.repository.MessageRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +17,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class MessageService {
 
     private final MessageRepository messageRepository;
+
+    public MessageService(MessageRepository messageRepository) {
+        this.messageRepository = messageRepository;
+    }
 
     public ResponseEntity<List<Message>> sendMessage(List<Message> messages, UUID iam) {
 

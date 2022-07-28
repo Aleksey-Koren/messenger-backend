@@ -1,5 +1,6 @@
 package com.example.whisper.controller;
 
+import com.example.whisper.app_properties.MessageProperties;
 import com.example.whisper.entity.Message;
 import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.MessageService;
@@ -27,10 +28,7 @@ public class MessageController {
 
     private final MessageRepository messageRepository;
     private final MessageService messageService;
-
-    @Value("${message.lifespan:86400000}")
-    private Long messageLifespan;
-
+    private final MessageProperties messageProperties;
 
     @PostMapping
     @Transactional
@@ -78,12 +76,12 @@ public class MessageController {
     }
 
 
-    @Scheduled(fixedDelayString = "${message.lifespan:86400000}")
+    @Scheduled(fixedDelayString = "#{@messageProperties.getLifespan()}")
     public void deleteOld() {
         messageRepository.deleteAll(messageRepository.findAll((root, query, criteriaBuilder) ->
                 criteriaBuilder.and(
                         criteriaBuilder.lessThanOrEqualTo(
-                                root.get("created"), Instant.now().minus(messageLifespan, ChronoUnit.MILLIS)),
+                                root.get("created"), Instant.now().minus(messageProperties.getLifespan(), ChronoUnit.MILLIS)),
                         criteriaBuilder.equal(root.get("type"), Message.MessageType.whisper)
         )));
     }

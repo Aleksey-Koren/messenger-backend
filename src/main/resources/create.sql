@@ -17,3 +17,9 @@ create table customer (
      public_key text,
      primary key (id)
 );
+
+create table utilities
+(
+    util_key varchar(100) not null unique,
+    util_value varchar(300) not null
+);
