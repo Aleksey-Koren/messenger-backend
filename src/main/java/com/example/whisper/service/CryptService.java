@@ -16,9 +16,9 @@ import static com.iwebpp.crypto.TweetNaclFast.*;
 @Slf4j
 public class CryptService {
 
-    public String decrypt(byte[] input, byte[] publicKeyToVerify, long nonce, byte[] secretKeyToDecrypt) {
-        Box box = new Box(publicKeyToVerify, secretKeyToDecrypt, nonce);
-        byte[] decrypted = box.open(input);
+    public String decrypt(byte[] input, byte[] publicKeyToVerify, byte[] nonce, byte[] secretKeyToDecrypt) {
+        Box box = new Box(publicKeyToVerify, secretKeyToDecrypt);
+        byte[] decrypted = box.open(input, nonce);
         if(decrypted == null) {
             log.warn("Message hasn't been decrypted");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

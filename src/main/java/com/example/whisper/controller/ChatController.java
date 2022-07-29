@@ -66,14 +66,14 @@ public class ChatController {
     public static void main(String[] args) {
         Base64.Decoder decoder = Base64.getDecoder();
 
-        byte[] frontendPublicKey = decoder.decode("I67HIvn/DVnwEABg88c17JMKz8uX12a6o7qAwhYyuCw=");
-        byte[] backendPrivateKey = decoder.decode("gW5z9c/wFhkktnitEd2oVFkjUsGwdG5Fmi5onqo3y7M=");
-        byte[] nonce = decoder.decode("XIhcxTQJoWoqR/t1PqEGI7iZxhWZnIuS");
-        byte[] encryptedString = decoder.decode("OtjrRy/+x50V5UgbqHyyAjQtm5t5FJjiFkc=");
+        byte[] frontendPublicKey = decoder.decode("N7h4GxkAA3ahKbh7UiLatJgZgNhVEiyPQGFzLz8whTg=");
+        byte[] backendPrivateKey = decoder.decode("gPeR6Skna3SAvPFCmUPLulSAAe32SscVvERnWuQt69o=");
+        byte[] nonce = decoder.decode("BNZsRNcMpAmwtMphoS3qfo6iIhDS3S5f");
+        byte[] encryptedString = decoder.decode("9NrhOr1GiYi+RwNXR69U8oA2wOYus4F/0rM=");
 
         TweetNaclFast.Box box = new TweetNaclFast.Box(frontendPublicKey, backendPrivateKey);
         byte[] decryptedString = box.open(encryptedString, nonce);
 
-        System.out.println(new String(decryptedString));
+        System.out.println("Decrypted: " + new String(decryptedString));
     }
 }

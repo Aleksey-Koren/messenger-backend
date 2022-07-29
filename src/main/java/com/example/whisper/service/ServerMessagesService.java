@@ -46,7 +46,7 @@ public class ServerMessagesService {
             Base64.Decoder decoder = Base64.getDecoder();
             String decrypted = cryptService.decrypt(decoder.decode(message.getData()),
                                                decoder.decode(sender.getPk()),
-                                               Long.parseLong(new String(decoder.decode(secretKey.getUtilValue()))),
+                                               decoder.decode(message.getNonce()),
                                                decoder.decode(secretKey.getUtilValue()));
             System.out.println("Decrypted data: " + decrypted);
             message.setData(decrypted);
