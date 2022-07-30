@@ -25,7 +25,7 @@ import java.util.UUID;
 public class Message {
 
     public enum MessageType {
-        iam, whisper, hello, who
+        iam, whisper, hello, who, server
     }
 
     @Id

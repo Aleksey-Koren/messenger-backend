@@ -4,24 +4,26 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.UUID;
-
 
 @Entity
+@Table(name = "utilities")
 @Getter
 @Setter
-@Table(name = "customer")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Customer {
+public class Utility {
+
     @Id
-    private UUID id;
-    @Column(name = "public_key")
-    private String pk;
+    private String utilKey;
+    private String utilValue;
+
+    public enum Key {
+        SERVER_USER_ID,
+        SERVER_USER_SECRET_KEY,
+        MESSAGE_LIFESPAN
+    }
 }

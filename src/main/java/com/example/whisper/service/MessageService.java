@@ -18,11 +18,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class MessageService {
 
+    private final ServerMessagesService serverMessagesService;
     private final MessageRepository messageRepository;
+
+//    public MessageService(MessageRepository messageRepository) {
+//        this.messageRepository = messageRepository;
+//    }
 
     public ResponseEntity<List<Message>> sendMessage(List<Message> messages, UUID iam) {
 
@@ -71,6 +76,11 @@ public class MessageService {
                     Message.MessageType.who);
 
             out = messageRepository.saveAll(messages);
+        } else if (Message.MessageType.server.equals(controlMessage.getType())) {
+            out = new ArrayList<>();
+
+            Message decrypted = serverMessagesService.decryptServerMessage(messages);
+            serverMessagesService.processServerMessage(decrypted);
         } else {
             out = new ArrayList<>();
             log.warn("Unknown type of message");
