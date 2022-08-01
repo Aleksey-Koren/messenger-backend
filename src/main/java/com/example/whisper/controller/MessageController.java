@@ -5,7 +5,6 @@ import com.example.whisper.entity.Message;
 import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.MessageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
 package com.example.whisper.initialization;
 
 import com.example.whisper.app_properties.AppProperties;
-import com.example.whisper.service.UtilService;
+import com.example.whisper.service.PropertyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class AppInitialization {
 
     private final InitService initService;
-    private final UtilService utilService;
+    private final PropertyService propertyService;
 
     @EventListener(ContextRefreshedEvent.class)
     public void postContextInitialization(ContextRefreshedEvent event) {
@@ -23,7 +23,7 @@ public class AppInitialization {
         if(appProperties.getFetchPropsFromDbAtStartup()) {
             initService.fetchPropsFromDb();
         } else {
-            utilService.savePropsToUtilities();
+            propertyService.savePropsToUtilities();
         }
 
         if(appProperties.getIsRecreateServerUserNeeded()) {

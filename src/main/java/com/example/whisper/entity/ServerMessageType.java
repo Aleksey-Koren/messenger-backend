@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum ServerMessageType {
-    LEAVE_ROOM("LEAVE_ROOM");
+
+    LEAVE_CHAT("LEAVE_CHAT");
 
     ServerMessageType(String value) {
         this.value = value;

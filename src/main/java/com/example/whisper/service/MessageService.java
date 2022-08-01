@@ -25,10 +25,6 @@ public class MessageService {
     private final ServerMessagesService serverMessagesService;
     private final MessageRepository messageRepository;
 
-//    public MessageService(MessageRepository messageRepository) {
-//        this.messageRepository = messageRepository;
-//    }
-
     public ResponseEntity<List<Message>> sendMessage(List<Message> messages, UUID iam) {
 
         if (!isValid(messages)) {
