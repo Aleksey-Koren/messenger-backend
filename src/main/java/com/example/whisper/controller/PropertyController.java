@@ -20,7 +20,7 @@ public class PropertyController {
 
     @GetMapping
     @Transactional
-    public ResponseEntity<ClientPropertiesDto> getProperties() {
+    public ResponseEntity<ClientPropertiesDto> getClientProperties() {
         ClientPropertiesDto dto = clientPropertiesMapper.toDto(utilService.findAll());
         return ResponseEntity.ok(dto);
     }
