@@ -3,7 +3,7 @@ package com.example.whisper.controller;
 import com.example.whisper.dto.ClientPropertiesDto;
 import com.example.whisper.service.UtilService;
 import lombok.RequiredArgsConstructor;
-import mapper.ClientPropertiesMapper;
+import com.example.whisper.mapper.ClientPropertiesMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;

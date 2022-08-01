@@ -1,7 +1,8 @@
-package mapper;
+package com.example.whisper.mapper;
 
 import com.example.whisper.dto.ClientPropertiesDto;
 import com.example.whisper.entity.Utility;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 import static com.example.whisper.entity.Utility.Key.MESSAGE_LIFESPAN;
 
 @Service
+@RequiredArgsConstructor
 public class ClientPropertiesMapper {
 
     public ClientPropertiesDto toDto(List<Utility> utilities) {
