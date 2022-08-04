@@ -24,6 +24,5 @@ public class Utility {
     public enum Key {
         SERVER_USER_ID,
         SERVER_USER_SECRET_KEY,
-        MESSAGE_LIFESPAN
     }
 }

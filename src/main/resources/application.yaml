@@ -1,9 +1,14 @@
 app:
   init-props:
-    fetch_props_from_db_at_startup: false
     is_recreate_server_user_needed: false
   message:
     lifespan: 86400000
+
+
+
+
+
+
 
 
 

@@ -1,11 +1,9 @@
 package com.example.whisper.initialization;
 
-import com.example.whisper.app_properties.MessageProperties;
 import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Utility;
 import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.UtilRepository;
-import com.iwebpp.crypto.TweetNacl;
 import com.iwebpp.crypto.TweetNaclFast;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,13 +17,8 @@ import java.util.UUID;
 public class InitService {
 
     private final UtilRepository utilRepository;
-    private final MessageProperties messageProperties;
     private final CustomerRepository customerRepository;
 
-    public void fetchPropsFromDb() {
-        utilRepository.findById(Utility.Key.MESSAGE_LIFESPAN.name())
-                .ifPresent(s -> messageProperties.setLifespan(Long.parseLong(s.getUtilValue())));
-    }
 
     @Transactional
     public void recreateServerUser() {

@@ -18,10 +18,6 @@ public class UtilService {
 
     private final UtilRepository utilRepository;
 
-    public Utility save(Utility entity) {
-        return utilRepository.save(entity);
-    }
-
     public List<Utility> findAll() {
         return utilRepository.findAll();
     }
