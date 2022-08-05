@@ -41,6 +41,7 @@ public class Message {
     @Enumerated(EnumType.ORDINAL)
     protected MessageType type;
     protected String data;
+    protected String attachments;
     protected String nonce;
     protected Instant created;
 }

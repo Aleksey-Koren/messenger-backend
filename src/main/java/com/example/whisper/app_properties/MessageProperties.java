@@ -14,5 +14,5 @@ import org.springframework.stereotype.Component;
 public class MessageProperties {
 
     private Long lifespan;
-
+    private String pathToAttachmentsFolder;
 }

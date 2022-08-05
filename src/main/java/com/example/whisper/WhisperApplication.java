@@ -9,6 +9,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -16,8 +20,10 @@ import java.util.stream.Collectors;
 @EnableScheduling
 public class WhisperApplication {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         SpringApplication.run(WhisperApplication.class, args);
+        Path path = Paths.get("C://testfolder/inner-folder");
+        Files.createDirectories(path);
     }
 
     @Bean

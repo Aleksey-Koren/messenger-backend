@@ -24,6 +24,7 @@ public class MessageService {
 
     private final ServerMessagesService serverMessagesService;
     private final MessageRepository messageRepository;
+    private final WhisperMessageService whisperMessageService;
 
     public ResponseEntity<List<Message>> sendMessage(List<Message> messages, UUID iam) {
 
@@ -36,7 +37,8 @@ public class MessageService {
         Message controlMessage = messages.get(0);
         List<Message> out;
         if (Message.MessageType.whisper.equals(controlMessage.getType())) {
-            out = messageRepository.saveAll(messages);
+
+            out = whisperMessageService.processMessages(messages);
         } else if (Message.MessageType.who.equals(controlMessage.getType())) {
 
             List<Message> mess = messageRepository.findByChatAndSenderAndReceiverAndType(
@@ -52,6 +54,7 @@ public class MessageService {
                 out = messageRepository.saveAll(messages);
             }
         } else if (Message.MessageType.hello.equals(controlMessage.getType())) {
+
             List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
             if (!receivers.isEmpty()) {
                 messageRepository.deleteHelloMessages(
@@ -62,6 +65,7 @@ public class MessageService {
             }
             out = messageRepository.saveAll(messages);
         } else if (Message.MessageType.iam.equals(controlMessage.getType())) {
+
             List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
 
             messageRepository.deleteAllByChatAndSenderInAndReceiverAndType(
@@ -73,11 +77,13 @@ public class MessageService {
 
             out = messageRepository.saveAll(messages);
         } else if (Message.MessageType.server.equals(controlMessage.getType())) {
+
             out = new ArrayList<>();
 
             Message decrypted = serverMessagesService.decryptServerMessage(messages);
             serverMessagesService.processServerMessage(decrypted);
         } else {
+
             out = new ArrayList<>();
             log.warn("Unknown type of message");
             ResponseEntity.badRequest().build();
@@ -146,14 +152,16 @@ public class MessageService {
     }
 
     private boolean areFieldsCorrect(List<Message> messages) {
-        Message oneFromAll = messages.get(0);
+        Message controlMessage = messages.get(0);
         for (Message message : messages) {
             if (isEmpty(message.getSender()) ||
                     isEmpty(message.getReceiver()) ||
                     message.getType() == null ||
-                    (!(Message.MessageType.who.equals(message.getType())) && isEmpty(message.getData())) ||
-                    !message.getSender().equals(oneFromAll.getSender()) ||
-                    oneFromAll.getChat() == null ? message.getChat() != null : !oneFromAll.getChat().equals(message.getChat())
+                    !message.getType().equals(controlMessage.getType()) ||
+                     (!(Message.MessageType.who.equals(message.getType())) && isEmpty(message.getData())) ||
+                    !message.getSender().equals(controlMessage.getSender()) ||
+                    controlMessage.getChat() == null ? message.getChat() != null : !controlMessage.getChat().equals(message.getChat()) ||
+                    !((controlMessage.getAttachments() != null) == (message.getAttachments() != null))
             ) {
                 return false;
             }

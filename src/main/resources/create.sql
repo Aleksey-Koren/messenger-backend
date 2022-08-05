@@ -5,6 +5,7 @@ create table message (
     chat uuid,
     type integer,
     data text,
+    attachments text,
     nonce text,
     created timestamp(3),
     primary key (id)
