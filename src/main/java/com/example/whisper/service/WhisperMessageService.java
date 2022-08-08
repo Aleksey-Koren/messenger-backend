@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -26,6 +26,8 @@ public class WhisperMessageService {
 
     @Value("#{messageProperties.pathToAttachmentsFolder}")
     private String PATH_TO_ATTACHMENTS;
+
+    private final String SEPARATOR = FileSystems.getDefault().getSeparator();
 
     private final MessageRepository messageRepository;
 
@@ -43,7 +45,7 @@ public class WhisperMessageService {
     }
 
     private Message processMessage(Message message) {
-        String folderPath = preparePath(message.getId());
+        String folderPath = retrieveFolderPath(message.getId());
 
         try {
             Files.createDirectories(Paths.get(folderPath));
@@ -54,16 +56,22 @@ public class WhisperMessageService {
         }
 
         String[] files = message.getAttachments().split(";");
-        List<String> filePaths = saveFiles(folderPath, files);
-        message.setAttachments(String.join(";", filePaths));
+        saveFiles(folderPath, files);
+        message.setAttachments(retrieveAttachmentsString(files));
         return message;
     }
 
-    private List<String> saveFiles(String folderPath, String[] files) {
-        List<String> filePaths = new ArrayList<>();
+    private String retrieveAttachmentsString(String[] files) {
+        List<String> indexes = new ArrayList<>();
         for(int i = 0; i < files.length; i++) {
-            String filePath = folderPath + "/" + i + ".txt";
-            filePaths.add(filePath);
+           indexes.add(String.valueOf(i));
+        }
+        return String.join(";", indexes);
+    }
+
+    private void saveFiles(String folderPath, String[] files) {
+        for(int i = 0; i < files.length; i++) {
+            String filePath = folderPath + SEPARATOR + i;
             try {
                 Files.writeString(Paths.get(filePath), files[i], StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
             } catch (IOException e) {
@@ -72,31 +80,28 @@ public class WhisperMessageService {
                 throw new ServiceException(eMessage, e);
             }
         }
-        return filePaths;
     }
 
-    private String preparePath(UUID messageId) {
+    public String retrieveFolderPath(UUID messageId) {
         String id = messageId.toString();
-        String separator = "/";
         StringBuilder absolutePath = new StringBuilder();
 
         absolutePath.append(PATH_TO_ATTACHMENTS);
-        if(PATH_TO_ATTACHMENTS.charAt(PATH_TO_ATTACHMENTS.length() - 1) != '/') {
-            absolutePath.append(separator);
+
+        char lastChar = PATH_TO_ATTACHMENTS.charAt(PATH_TO_ATTACHMENTS.length() - 1);
+        char separator = SEPARATOR.toCharArray()[0];
+        if(lastChar != separator) {
+            absolutePath.append(SEPARATOR);
         }
-        absolutePath.append(id, 0, 4);
-        absolutePath.append(separator);
-        absolutePath.append(id, 4, 8);
-        absolutePath.append(separator);
-        absolutePath.append(id, 8 ,12);
-        absolutePath.append(separator);
+
+        absolutePath.append(id, 0, 3);
+        absolutePath.append(SEPARATOR);
+        absolutePath.append(id, 3, 6);
+        absolutePath.append(SEPARATOR);
+        absolutePath.append(id, 6 ,8);
+        absolutePath.append(SEPARATOR);
         absolutePath.append(id);
 
         return  absolutePath.toString();
-    }
-
-    public static void main(String[] args) {
-        Path p = Paths.get("C://Koran");
-
     }
 }

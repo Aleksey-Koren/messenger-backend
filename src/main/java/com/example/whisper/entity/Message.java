@@ -30,18 +30,18 @@ public class Message {
 
     @Id
     @Type(type = "org.hibernate.type.UUIDCharType")
-    protected UUID id;
+    private UUID id;
     @Type(type = "org.hibernate.type.UUIDCharType")
-    protected UUID sender;
+    private UUID sender;
     @Type(type = "org.hibernate.type.UUIDCharType")
-    protected UUID receiver;
+    private UUID receiver;
     @Type(type = "org.hibernate.type.UUIDCharType")
-    protected UUID chat;
+    private UUID chat;
 
     @Enumerated(EnumType.ORDINAL)
-    protected MessageType type;
-    protected String data;
-    protected String attachments;
-    protected String nonce;
-    protected Instant created;
+    private MessageType type;
+    private String data;
+    private String attachments;
+    private String nonce;
+    private Instant created;
 }

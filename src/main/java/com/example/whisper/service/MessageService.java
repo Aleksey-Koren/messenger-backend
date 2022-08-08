@@ -2,6 +2,7 @@ package com.example.whisper.service;
 
 import com.example.whisper.entity.LastMessageCreated;
 import com.example.whisper.entity.Message;
+import com.example.whisper.exceptions.ServiceException;
 import com.example.whisper.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -116,6 +117,11 @@ public class MessageService {
         return messageRepository.saveAll(messages);
     }
 
+    public Message getById(UUID id) {
+        return messageRepository.findById(id).orElseThrow(() ->
+                new ServiceException(String.format("Message with id: %s doesn't exists in database", id.toString())));
+    }
+
     private void setInstantData(List<Message> messages) {
         Instant now = Instant.now();
         if (messages.get(0).getChat() == null) {
@@ -150,7 +156,6 @@ public class MessageService {
     private boolean isEmpty(List<Message> messages) {
         return messages == null || messages.isEmpty();
     }
-
     private boolean areFieldsCorrect(List<Message> messages) {
         Message controlMessage = messages.get(0);
         for (Message message : messages) {
@@ -183,6 +188,7 @@ public class MessageService {
         }
         return true;
     }
+
 
     private boolean isEmpty(String str) {
         return str == null || "".equals(str);
