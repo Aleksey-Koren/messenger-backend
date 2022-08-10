@@ -37,7 +37,8 @@ public class ChatController {
         if (participants.isEmpty()) {
             return new ArrayList<>();
         } else {
-            return customerRepository.findAllById(participants);
+            List<Customer> allById = customerRepository.findAllById(participants);
+            return allById;
         }
     }
 

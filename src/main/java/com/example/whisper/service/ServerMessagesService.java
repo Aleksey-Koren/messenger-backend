@@ -48,7 +48,6 @@ public class ServerMessagesService {
                                                decoder.decode(sender.getPk()),
                                                decoder.decode(message.getNonce()),
                                                decoder.decode(secretKey.getUtilValue()));
-            System.out.println("Decrypted data: " + decrypted);
             message.setData(decrypted);
             return message;
         }
@@ -67,10 +66,9 @@ public class ServerMessagesService {
         }
 
         switch (type) {
-            case LEAVE_ROOM ->
+            case LEAVE_CHAT ->
                 messageRepository
                         .deleteAllByReceiverAndChatAndType(decrypted.getSender(), decrypted.getChat(), Message.MessageType.hello);
         }
-
     }
 }

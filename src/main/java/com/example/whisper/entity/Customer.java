@@ -12,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.UUID;
 
-
 @Entity
 @Getter
 @Setter
@@ -21,6 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Customer {
     @Id
+    @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID id;
     @Column(name = "public_key")
     private String pk;

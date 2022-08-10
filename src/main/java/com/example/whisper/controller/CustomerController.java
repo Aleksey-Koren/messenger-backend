@@ -3,6 +3,8 @@ package com.example.whisper.controller;
 import com.example.whisper.entity.Customer;
 import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.MessageRepository;
+import com.example.whisper.service.CustomerService;
+import com.example.whisper.service.UtilService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -34,6 +36,8 @@ public class CustomerController {
 
     private final CustomerRepository customerRepository;
     private final MessageRepository messageRepository;
+    private final UtilService utilService;
+    private final CustomerService customerService;
 
     @PostMapping
     public ResponseEntity<Customer> register(@RequestBody Customer customer) {
@@ -94,8 +98,13 @@ public class CustomerController {
         }
     }
 
+    @GetMapping("server")
+    public ResponseEntity<Customer> getServerCustomer() {
+        UUID serverUserId = utilService.getServerUserId();
+        return ResponseEntity.ok(customerService.getById(serverUserId));
+    }
+
     private boolean isEmpty(String str) {
         return str == null || "".equals(str);
     }
-
 }

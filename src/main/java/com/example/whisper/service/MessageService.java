@@ -2,6 +2,7 @@ package com.example.whisper.service;
 
 import com.example.whisper.entity.LastMessageCreated;
 import com.example.whisper.entity.Message;
+import com.example.whisper.exceptions.ServiceException;
 import com.example.whisper.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +25,7 @@ public class MessageService {
 
     private final ServerMessagesService serverMessagesService;
     private final MessageRepository messageRepository;
-
-//    public MessageService(MessageRepository messageRepository) {
-//        this.messageRepository = messageRepository;
-//    }
+    private final WhisperMessageService whisperMessageService;
 
     public ResponseEntity<List<Message>> sendMessage(List<Message> messages, UUID iam) {
 
@@ -40,7 +38,8 @@ public class MessageService {
         Message controlMessage = messages.get(0);
         List<Message> out;
         if (Message.MessageType.whisper.equals(controlMessage.getType())) {
-            out = messageRepository.saveAll(messages);
+
+            out = whisperMessageService.processMessages(messages);
         } else if (Message.MessageType.who.equals(controlMessage.getType())) {
 
             List<Message> mess = messageRepository.findByChatAndSenderAndReceiverAndType(
@@ -56,6 +55,7 @@ public class MessageService {
                 out = messageRepository.saveAll(messages);
             }
         } else if (Message.MessageType.hello.equals(controlMessage.getType())) {
+
             List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
             if (!receivers.isEmpty()) {
                 messageRepository.deleteHelloMessages(
@@ -66,6 +66,7 @@ public class MessageService {
             }
             out = messageRepository.saveAll(messages);
         } else if (Message.MessageType.iam.equals(controlMessage.getType())) {
+
             List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
 
             messageRepository.deleteAllByChatAndSenderInAndReceiverAndType(
@@ -77,11 +78,13 @@ public class MessageService {
 
             out = messageRepository.saveAll(messages);
         } else if (Message.MessageType.server.equals(controlMessage.getType())) {
+
             out = new ArrayList<>();
 
             Message decrypted = serverMessagesService.decryptServerMessage(messages);
             serverMessagesService.processServerMessage(decrypted);
         } else {
+
             out = new ArrayList<>();
             log.warn("Unknown type of message");
             ResponseEntity.badRequest().build();
@@ -112,6 +115,11 @@ public class MessageService {
         messageRepository.deleteAllBySenderAndType(commonData.getSender(), Message.MessageType.iam);
         setInstantData(messages);
         return messageRepository.saveAll(messages);
+    }
+
+    public Message getById(UUID id) {
+        return messageRepository.findById(id).orElseThrow(() ->
+                new ServiceException(String.format("Message with id: %s doesn't exists in database", id.toString())));
     }
 
     private void setInstantData(List<Message> messages) {
@@ -148,16 +156,17 @@ public class MessageService {
     private boolean isEmpty(List<Message> messages) {
         return messages == null || messages.isEmpty();
     }
-
     private boolean areFieldsCorrect(List<Message> messages) {
-        Message oneFromAll = messages.get(0);
+        Message controlMessage = messages.get(0);
         for (Message message : messages) {
             if (isEmpty(message.getSender()) ||
                     isEmpty(message.getReceiver()) ||
                     message.getType() == null ||
-                    (!(Message.MessageType.who.equals(message.getType())) && isEmpty(message.getData())) ||
-                    !message.getSender().equals(oneFromAll.getSender()) ||
-                    oneFromAll.getChat() == null ? message.getChat() != null : !oneFromAll.getChat().equals(message.getChat())
+                    !message.getType().equals(controlMessage.getType()) ||
+                     (!(Message.MessageType.who.equals(message.getType())) && isEmpty(message.getData())) ||
+                    !message.getSender().equals(controlMessage.getSender()) ||
+                    controlMessage.getChat() == null ? message.getChat() != null : !controlMessage.getChat().equals(message.getChat()) ||
+                    !((controlMessage.getAttachments() != null) == (message.getAttachments() != null))
             ) {
                 return false;
             }
@@ -179,6 +188,7 @@ public class MessageService {
         }
         return true;
     }
+
 
     private boolean isEmpty(String str) {
         return str == null || "".equals(str);
