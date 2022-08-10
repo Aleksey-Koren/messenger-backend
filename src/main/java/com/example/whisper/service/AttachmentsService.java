@@ -21,28 +21,21 @@ public class AttachmentsService {
    private final MessageService messageService;
    private final WhisperMessageService whisperMessageService;
 
-   public AttachmentDto retrieveAttachments(UUID messageId) {
-      Message message = messageService.getById(messageId);
-      List<String> files = readFiles(message.getAttachments().split(";"), messageId);
-      return  new AttachmentDto(files);
+   public byte[] retrieveAttachment(UUID messageId, String attachment) {
+      return readFile(attachment, messageId);
    }
 
-   private List<String> readFiles(String[] attachments, UUID messageId) {
-      List<String> files = new ArrayList<>();
+   private byte[] readFile (String attachment, UUID messageId) {
       String separator = FileSystems.getDefault().getSeparator();
-      String file;
+      byte[] file;
 
-      for (String attachment : attachments) {
          String pathToFolder = whisperMessageService.retrieveFolderPath(messageId);
          String pathToFile = pathToFolder + separator + attachment;
          try {
-            file = Files.readString(Paths.get(pathToFile));
+            file = Files.readAllBytes(Paths.get(pathToFile));
          } catch (IOException e) {
             throw new ServiceException("Troubles with file reading", e);
          }
-         files.add(file);
-      }
-
-      return files;
+      return file;
    }
 }

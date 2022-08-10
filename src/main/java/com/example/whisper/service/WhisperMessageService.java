@@ -15,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -70,10 +72,11 @@ public class WhisperMessageService {
     }
 
     private void saveFiles(String folderPath, String[] files) {
-        for(int i = 0; i < files.length; i++) {
-            String filePath = folderPath + SEPARATOR + i;
+        List<byte[]> filesAsBytes = Arrays.stream(files).map(s -> Base64.getDecoder().decode(s)).collect(Collectors.toList());
+        for(byte[] arr : filesAsBytes) {
+            String filePath = folderPath + SEPARATOR + filesAsBytes.indexOf(arr);
             try {
-                Files.writeString(Paths.get(filePath), files[i], StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
+                Files.write(Paths.get(filePath), arr, StandardOpenOption.CREATE_NEW);
             } catch (IOException e) {
                 String eMessage = "Troubles with file creation";
                 log.warn(eMessage);
