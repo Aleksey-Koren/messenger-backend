@@ -1,7 +1,10 @@
 package com.example.whisper.controller;
 
+import com.example.whisper.dto.FileStreamDto;
 import com.example.whisper.service.AttachmentsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,8 +21,12 @@ public class AttachmentsController {
 
     private final AttachmentsService attachmentsService;
 
-    @GetMapping(produces = {MediaType.ALL_VALUE})
-    public ResponseEntity<byte[]> retrieveAttachments(@RequestParam UUID messageId, @RequestParam String attachment) {
-        return ResponseEntity.ok(attachmentsService.retrieveAttachment(messageId, attachment));
+    @GetMapping(produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+    public ResponseEntity<InputStreamResource> retrieveAttachments(@RequestParam UUID messageId, @RequestParam String attachment) {
+        FileStreamDto dto = attachmentsService.retrieaveFileStream(attachment, messageId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentLength(dto.getContentLength());
+        InputStreamResource inputStreamResource = new InputStreamResource(dto.getInputStream());
+        return ResponseEntity.ok().headers(headers).body(inputStreamResource);
     }
 }
