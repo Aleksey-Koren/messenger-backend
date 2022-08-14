@@ -163,7 +163,7 @@ public class MessageService {
                     isEmpty(message.getReceiver()) ||
                     message.getType() == null ||
                     !message.getType().equals(controlMessage.getType()) ||
-                     (!(Message.MessageType.who.equals(message.getType())) && isEmpty(message.getData())) ||
+                     (!(Message.MessageType.who.equals(message.getType())) && isEmpty(message.getData())) && isEmpty(message.getAttachments()) ||
                     !message.getSender().equals(controlMessage.getSender()) ||
                     controlMessage.getChat() == null ? message.getChat() != null : !controlMessage.getChat().equals(message.getChat()) ||
                     !((controlMessage.getAttachments() != null) == (message.getAttachments() != null))
