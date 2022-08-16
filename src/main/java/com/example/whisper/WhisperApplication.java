@@ -20,10 +20,8 @@ import java.util.stream.Collectors;
 @EnableScheduling
 public class WhisperApplication {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         SpringApplication.run(WhisperApplication.class, args);
-        Path path = Paths.get("C://testfolder/inner-folder");
-        Files.createDirectories(path);
     }
 
     @Bean

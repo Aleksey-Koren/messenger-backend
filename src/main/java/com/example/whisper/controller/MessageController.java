@@ -3,6 +3,7 @@ package com.example.whisper.controller;
 import com.example.whisper.app_properties.MessageProperties;
 import com.example.whisper.entity.Message;
 import com.example.whisper.repository.MessageRepository;
+import com.example.whisper.service.FileService;
 import com.example.whisper.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,7 @@ public class MessageController {
     private final MessageRepository messageRepository;
     private final MessageService messageService;
     private final MessageProperties messageProperties;
+    private final FileService fileService;
 
     @PostMapping
     @Transactional
@@ -69,19 +71,17 @@ public class MessageController {
             if (before != null) {
                 where = criteriaBuilder.and(where, criteriaBuilder.lessThan(root.get("created"), before));
             }
-            query.orderBy(criteriaBuilder.asc(root.get("created")));
+            query.orderBy(criteriaBuilder.desc(root.get("created")));
             return where;
         }, pageable);
     }
 
 
     @Scheduled(fixedDelayString = "#{@messageProperties.getLifespan()}")
+    @Transactional
     public void deleteOld() {
-        messageRepository.deleteAll(messageRepository.findAll((root, query, criteriaBuilder) ->
-                criteriaBuilder.and(
-                        criteriaBuilder.lessThanOrEqualTo(
-                                root.get("created"), Instant.now().minus(messageProperties.getLifespan(), ChronoUnit.MILLIS)),
-                        criteriaBuilder.equal(root.get("type"), Message.MessageType.whisper)
-        )));
+        List<Message> old = messageService.findOld();
+        old.stream().filter(message -> message.getAttachments() != null).forEach(fileService::deleteAllAttachments);
+        messageService.deleteAll(old);
     }
 }

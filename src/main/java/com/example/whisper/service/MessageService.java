@@ -1,5 +1,6 @@
 package com.example.whisper.service;
 
+import com.example.whisper.app_properties.MessageProperties;
 import com.example.whisper.entity.LastMessageCreated;
 import com.example.whisper.entity.Message;
 import com.example.whisper.exceptions.ServiceException;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,7 @@ public class MessageService {
     private final ServerMessagesService serverMessagesService;
     private final MessageRepository messageRepository;
     private final WhisperMessageService whisperMessageService;
+    private final MessageProperties messageProperties;
 
     public ResponseEntity<List<Message>> sendMessage(List<Message> messages, UUID iam) {
 
@@ -117,9 +120,22 @@ public class MessageService {
         return messageRepository.saveAll(messages);
     }
 
+    public List<Message> findOld() {
+        return messageRepository.findAll((root, query, criteriaBuilder) ->
+                criteriaBuilder.and(
+                        criteriaBuilder.lessThanOrEqualTo(
+                                root.get("created"), Instant.now().minus(messageProperties.getLifespan(), ChronoUnit.MILLIS)),
+                        criteriaBuilder.equal(root.get("type"), Message.MessageType.whisper)
+                ));
+    }
+
     public Message getById(UUID id) {
         return messageRepository.findById(id).orElseThrow(() ->
                 new ServiceException(String.format("Message with id: %s doesn't exists in database", id.toString())));
+    }
+
+    public void deleteAll(List<Message> messages) {
+        messageRepository.deleteAll(messages);
     }
 
     private void setInstantData(List<Message> messages) {

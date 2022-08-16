@@ -16,11 +16,12 @@ import java.util.UUID;
 public class AttachmentsService {
 
    private final WhisperMessageService whisperMessageService;
+   private final FileService fileService;
 
-   public FileStreamDto retrieaveFileStream(String attachment, UUID messageId) {
+   public FileStreamDto retrieveFileStream(String attachment, UUID messageId) {
       String separator = FileSystems.getDefault().getSeparator();
 
-      String pathToFolder = whisperMessageService.retrieveFolderPath(messageId);
+      String pathToFolder = fileService.retrieveFolderPath(messageId);
       String pathToFile = pathToFolder + separator + attachment;
       InputStream inputStream;
       long contentLength;

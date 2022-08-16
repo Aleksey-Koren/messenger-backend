@@ -23,7 +23,7 @@ public class AttachmentsController {
 
     @GetMapping(produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     public ResponseEntity<InputStreamResource> retrieveAttachments(@RequestParam UUID messageId, @RequestParam String attachment) {
-        FileStreamDto dto = attachmentsService.retrieaveFileStream(attachment, messageId);
+        FileStreamDto dto = attachmentsService.retrieveFileStream(attachment, messageId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentLength(dto.getContentLength());
         InputStreamResource inputStreamResource = new InputStreamResource(dto.getInputStream());
