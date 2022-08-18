@@ -4,7 +4,7 @@ app:
   message:
     lifespan: 86400000
 #    lifespan: 10000
-    path_to_attachments_folder: "C:/wsp-attachments"
+    path_to_attachments_folder: "C:\\wsp-attachments"
 
 
 

@@ -34,8 +34,9 @@ public class FileService {
     }
 
     public void deleteAllAttachments(Message message) {
-        Path directoryPath = Paths.get(retrieveFolderPath(message.getId()));
-        deleteAllFilesWithDirectory(directoryPath);
+        Path directory = Paths.get(retrieveFolderPath(message.getId()));
+        deleteAllFiles(directory);
+        deleteEmptyParents(directory);
     }
 
     public String retrieveFolderPath(UUID messageId) {
@@ -86,48 +87,61 @@ public class FileService {
         }
     }
 
-    private void deleteAllFilesWithDirectory(Path path) {
-        assertDirectory(path);
-        try (Stream<Path> list = Files.list(path)) {
-            final List<Path> paths = list.toList();
-            for (Path filePath : paths) {
-                Files.deleteIfExists(filePath);
+    private void deleteAllFiles(Path directory) {
+        if (Files.isDirectory(directory)) {
+            try (Stream<Path> files = Files.list(directory)) {
+                files.forEach(this::deleteFile);
+            } catch (IOException e) {
+                log.warn("Problem with reading files in attachment directory {}", absoluteToRelativePath(directory));
             }
-            Files.deleteIfExists(path);
+        } else {
+            log.warn("Retrieved pass {} doesn't point on directory. It isn't directory, or it doesn't exist", absoluteToRelativePath(directory));
+        }
+    }
+
+    private void deleteEmptyParents(Path directory) {
+        String rootDirectoryName = PATH_TO_ATTACHMENTS.substring(PATH_TO_ATTACHMENTS.lastIndexOf(SEPARATOR) + 1);
+        while (!directory.getFileName().toString().equals(rootDirectoryName)) {
+            if (isEmpty(directory)) {
+                deleteDirectory(directory);
+                directory = directory.getParent();
+            } else {
+                break;
+            }
+        }
+    }
+
+
+    private boolean isEmpty(Path directory) {
+        try (Stream<Path> files = Files.list(directory)) {
+            return files.findFirst().isEmpty();
         } catch (IOException e) {
-            throw new ServiceException(e);
-        }
-        log.info("Attachments in folder {} has been deleted with the folder", path.getFileName());
-        System.out.println(path.getFileName());
-    }
-
-    private void assertDirectory(Path directory) {
-        if(!Files.isDirectory(directory)) {
-            String message = "Path witch was retrieved from message id is not a directory";
-            log.warn(message);
-            throw new ServiceException(message);
+            log.warn("Pass {} doesn't point on directory. It isn't directory, or it doesn't exist", absoluteToRelativePath(directory));
+            return true;
         }
     }
 
-//    private boolean isEmpty(Path directory) {
-//        try(Stream<Path> files = Files.list(directory)) {
-//            return files.findFirst().isEmpty();
-//        }catch (IOException e) {
-//            throw new ServiceException(e);
-//        }
-//    }
+    private void deleteFile(Path file) {
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            log.warn("File {} was not deleted. IOException", absoluteToRelativePath(file));
+        } catch (SecurityException e) {
+            log.warn("File {} was not deleted. Troubles with file access", absoluteToRelativePath(file));
+        }
+    }
 
-//    public boolean deleteDirectoryIfIsEmpty(Path path) {
-//        assertDirectory(path);
-//        if(isEmpty(path)) {
-//            try {
-//                Files.delete(path);
-//                return true;
-//            } catch (IOException e) {
-//                throw new ServiceException(e);
-//            }
-//        } else {
-//            return false;
-//        }
-//    }
+    private void deleteDirectory(Path directory) {
+        try {
+            Files.deleteIfExists(directory);
+        } catch (IOException e) {
+            log.warn("Directory {} was not deleted. IOException", absoluteToRelativePath(directory));
+        } catch (SecurityException e) {
+            log.warn("Directory {} was not deleted. Troubles with file access", absoluteToRelativePath(directory));
+        }
+    }
+
+    private String absoluteToRelativePath(Path filePath) {
+        return filePath.toString().substring(PATH_TO_ATTACHMENTS.length());
+    }
 }

@@ -78,7 +78,6 @@ public class MessageController {
 
 
     @Scheduled(fixedDelayString = "#{@messageProperties.getLifespan()}")
-    @Transactional
     public void deleteOld() {
         List<Message> old = messageService.findOld();
         old.stream().filter(message -> message.getAttachments() != null).forEach(fileService::deleteAllAttachments);
