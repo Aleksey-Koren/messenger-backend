@@ -19,48 +19,54 @@
 <script>
     var app = document.getElementById("application");
     var ui = new WhisperUi({
-        logout: function() {return new Promise(resolve => {
-            localStorage.clear();
-            start();
-            resolve();
-        })},
-        newUser: function(user) {},
-        selectUser: function(user){},
-        sendMessage: function(message){return null},
+        logout: function () {
+            return new Promise(resolve => {
+                localStorage.clear();
+                start();
+                resolve();
+            })
+        },
+        newUser: function (user) {
+        },
+        selectUser: function (user) {
+        },
+        sendMessage: function (message) {
+            return null
+        },
     });
     app.appendChild(ui.container);
 
     function start() {
-        initContext().then(function(context) {
+        initContext().then(function (context) {
 
             function loadChat(chatId) {
                 return Rest.doGet(
                     'chats/' + chatId + '/participants'
-                ).then(function(response) {
-                    if(!context.chats[chatId]) {
+                ).then(function (response) {
+                    if (!context.chats[chatId]) {
                         context.chats[chatId] = {
                             id: chatId,
                             users: [],
                             messages: []
                         };
                     }
-                    context.chats[chatId].users = response.map(function(user) {
+                    context.chats[chatId].users = response.map(function (user) {
                         return user.id;
                     });
-                    response.forEach(function(user) {
-                        if(!context.users[user.id]) {
+                    response.forEach(function (user) {
+                        if (!context.users[user.id]) {
                             context.users[user.id] = {};
                         }
                         context.users[user.id].id = user.id;
                         context.users[user.id].publicKey = Uint8Array.from(user.pk.split(","));
                     })
                     return response;
-                }).then(function() {
+                }).then(function () {
                     return Rest.doGet("messages?receiver=" + context.user.id + "&chat=" + chatId)
-                }).then(function(messages) {
+                }).then(function (messages) {
                     context.chats[chatId].messages = messages;
                     console.log(context);
-                    messages.forEach(function(message) {
+                    messages.forEach(function (message) {
                         ui.addMessage({
                             sender: message.sender,
                             message: uint8ToString(decrypt(message.data, context.user.secretKey, context.users[message.sender].publicKey, message.nonce)),
@@ -69,21 +75,21 @@
                             type: message.type
                         }, context.user.id)
                     });
-                }).catch(function(e) {
+                }).catch(function (e) {
                     console.log(e);
                     var reloadChatDetails = createConfirm({
                         title: "Fail to load chat details",
                         yes: {
                             title: 'Reload',
-                            onclick: function() {
-                                loadChat(chatId).then(function() {
+                            onclick: function () {
+                                loadChat(chatId).then(function () {
                                     reloadChatDetails.close();
                                 })
                             }
                         },
                         no: {
                             title: 'Close',
-                            onclick: function() {
+                            onclick: function () {
                                 reloadChatDetails.close();
                             }
                         }
@@ -92,7 +98,7 @@
             }
 
             function prepareMessage(message, type, users) {
-                return (users || context.chats[context.activeChat].users).map(function(id) {
+                return (users || context.chats[context.activeChat].users).map(function (id) {
                     var user = context.users[id];
 
                     var encrypted = encrypt(message, user.publicKey, context.user.secretKey);
@@ -106,15 +112,16 @@
                     };
                 })
             }
-            ui.context.newUser = function(user) {
-                if(!context.users[user.id]) {
+
+            ui.context.newUser = function (user) {
+                if (!context.users[user.id]) {
                     context.users[user.id] = user;
                 }
                 context.activeChat = null;
-                sendMessage(prepareMessage("", "hello", [context.user.id, user.id])).then(function(response) {
+                sendMessage(prepareMessage("", "hello", [context.user.id, user.id])).then(function (response) {
                     var chat = {
                         id: response[0].chat,
-                        users: response.map(function(message) {
+                        users: response.map(function (message) {
                             return message.recipient
                         })
                     }
@@ -122,21 +129,21 @@
                     ui.context.selectChat(chat);
                 });
             }
-            ui.context.selectChat = function(chat) {
+            ui.context.selectChat = function (chat) {
                 context.activeChat = chat.id;
-                loadChat(chat.id).then(function() {
+                loadChat(chat.id).then(function () {
                     persistContext(context);
                 });
             }
-            ui.context.sendMessage = function(message) {
-                return sendMessage(prepareMessage(message, 'whisper')).then(function() {
+            ui.context.sendMessage = function (message) {
+                return sendMessage(prepareMessage(message, 'whisper')).then(function () {
                     return loadChat(context.activeChat);
                 });
             }
-            for(var chatId in context.chats) {
+            for (var chatId in context.chats) {
                 var chat = context.chats[chatId];
                 ui.addChat(chat);
-                if(chat.id === context.activeChat) {
+                if (chat.id === context.activeChat) {
                     ui.selectChat(chat);
                 }
             }
@@ -146,13 +153,14 @@
             }
 
 
-            setInterval(function() {
-                if(context.activeChat) {
+            setInterval(function () {
+                if (context.activeChat) {
                     loadChat(context.activeChat)
                 }
             }, 5000)
         })
     }
+
     start();
 </script>
 </body>

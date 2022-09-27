@@ -4,13 +4,16 @@ html, body {
     width: 100%;
     height: 100%;
 }
+
 div, textarea, button {
     box-sizing: border-box;
 }
+
 #application {
     width: 100%;
     height: 100%;
 }
+
 .ui-messages {
     width: 75%;
     height: 80%;
@@ -18,6 +21,7 @@ div, textarea, button {
     right: 0;
     position: fixed;
 }
+
 .ui-input {
     width: 55%;
     height: 20%;
@@ -25,6 +29,7 @@ div, textarea, button {
     right: 20%;
     position: fixed;
 }
+
 .ui-send-message {
     width: 20%;
     height: 20%;
@@ -32,6 +37,7 @@ div, textarea, button {
     right: 0;
     position: fixed;
 }
+
 .ui-sidebar {
     width: 23%;
     height: 100%;
@@ -41,7 +47,6 @@ div, textarea, button {
     top: 0;
     border-right: 1px solid black
 }
-
 
 
 .component-overlay {
@@ -54,6 +59,7 @@ div, textarea, button {
     background: black;
     z-index: 100;
 }
+
 .component-popup {
     position: fixed;
     top: 200px;
@@ -64,14 +70,17 @@ div, textarea, button {
     background: white;
     z-index: 200;
 }
+
 .ui-chat {
     border-bottom: 1px solid black;
     padding: 10px 10px;
     margin-bottom: 10px;
 }
+
 .ui-chat-selected {
     font-weight: bold;
 }
+
 .ui-chat:last-child {
     border-bottom: none;
 }

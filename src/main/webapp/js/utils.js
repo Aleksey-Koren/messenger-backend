@@ -1,7 +1,8 @@
-function uint8ToString(buffer){
+function uint8ToString(buffer) {
     return new TextDecoder().decode(buffer)
 }
-function stringToUint8(buffer){
+
+function stringToUint8(buffer) {
     return new TextEncoder().encode(buffer);
 }
 
@@ -14,7 +15,7 @@ function stringToUint8(buffer){
  */
 function encrypt(message, publicKeyToEncrypt, privateKeyToSign, nonce) {
     var data = stringToUint8(message);
-    if(!nonce) {
+    if (!nonce) {
         nonce = new Uint8Array(24);
         self.crypto.getRandomValues(nonce)
     }
@@ -23,6 +24,7 @@ function encrypt(message, publicKeyToEncrypt, privateKeyToSign, nonce) {
         nonce: Base64.fromByteArray(nonce)
     };
 }
+
 /**
  * @param data string
  * @param secretKeyToDecrypt Uint8Array

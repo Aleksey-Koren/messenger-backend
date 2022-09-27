@@ -1,26 +1,22 @@
 package com.example.whisper.service;
 
+import com.example.whisper.dto.MemberResponseDto;
 import com.example.whisper.entity.Customer;
-import com.example.whisper.repository.CustomerRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
-@Service
-@RequiredArgsConstructor
-@Slf4j
-public class CustomerService {
+public interface CustomerService {
 
-    private final CustomerRepository customerRepository;
+    Customer findById(UUID id);
 
-    public Customer getById(UUID id) {
-        return customerRepository.findById(id).orElseThrow(() -> {
-            log.warn("No customer with id = {} in database", id);
-            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
-        });
-    }
+    List<Customer> findAllByIds(List<UUID> ids);
+
+    List<MemberResponseDto> findAllByChatId(UUID chatId);
+
+    List<Customer> getDistinctCustomersWhichMembersOfChatsByCustomerId(UUID customerId);
+
+    Customer register(Customer customer);
+
+    Void delete(Customer customer);
 }

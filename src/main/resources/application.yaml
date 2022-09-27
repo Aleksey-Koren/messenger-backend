@@ -3,20 +3,21 @@ app:
     is_recreate_server_user_needed: true
   message:
     lifespan: 86400000
-#    lifespan: 10000
+    #    lifespan: 10000
     path_to_attachments_folder: "C:\\wsp-attachments"
 
-
-
+server:
+  error:
+    include-message: always
 spring:
   datasource:
-    url: jdbc:mariadb://localhost:3306/whisper
+    url: jdbc:mariadb://localhost:3307/whisper
     username: root
-    password: root
+    password: 27072001
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
       naming.physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
     database-platform: org.hibernate.dialect.MariaDB103Dialect
-    show-sql: false
+    show-sql: true

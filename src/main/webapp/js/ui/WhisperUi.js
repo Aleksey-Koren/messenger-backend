@@ -15,12 +15,12 @@ function WhisperUi(context) {
     this.textarea.className = "ui-input";
     this.container.appendChild(this.textarea);
 
-    this.sendButton =  document.createElement('button');
+    this.sendButton = document.createElement('button');
     this.sendButton.className = "ui-send-message"
     this.sendButton.innerText = "Send"
-    this.sendButton.onclick = function() {
-        if(me.textarea.value) {
-            me.context.sendMessage(me.textarea.value).then(function(){
+    this.sendButton.onclick = function () {
+        if (me.textarea.value) {
+            me.context.sendMessage(me.textarea.value).then(function () {
                 me.textarea.value = ''
             });
         }
@@ -34,7 +34,7 @@ function WhisperUi(context) {
     this.addUser = document.createElement('button');
     this.chats = {};
     var me = this;
-    this.addUser.onclick = function(e) {
+    this.addUser.onclick = function (e) {
         e.preventDefault();
         var popup = createPopup();
         var header = document.createElement('h2');
@@ -51,9 +51,9 @@ function WhisperUi(context) {
         var search = document.createElement('button');
         search.innerText = 'Search';
         popup.popup.appendChild(search);
-        search.onclick = function(e) {
-            if(input.value) {
-                Rest.doGet("customers/" + input.value).then(function(user) {
+        search.onclick = function (e) {
+            if (input.value) {
+                Rest.doGet("customers/" + input.value).then(function (user) {
                     me.context.newUser({
                         id: user.id,
                         publicKey: Uint8Array.from(user.pk.split(","))
@@ -61,7 +61,7 @@ function WhisperUi(context) {
                     me.messagesContainer.innerHTML = '';
                     me.textarea.value = '';
                     popup.close();
-                }).catch(function(e) {
+                }).catch(function (e) {
                     console.log(e);
                     switch (e.status) {
                         default:
@@ -84,7 +84,7 @@ function WhisperUi(context) {
     }
 
     this.logout = document.createElement('button');
-    this.logout.onclick = function() {
+    this.logout.onclick = function () {
         var logoutPopup = createPopup();
         var header = document.createElement('h2');
         header.innerText = "Are you sure to logout?";
@@ -92,16 +92,16 @@ function WhisperUi(context) {
 
         var no = document.createElement('button');
         no.innerText = 'Cancel';
-        no.onclick = function() {
+        no.onclick = function () {
             logoutPopup.close();
         }
         logoutPopup.popup.appendChild(no);
 
         var yes = document.createElement('button');
         yes.innerText = 'Yes, logout';
-        yes.onclick = function() {
+        yes.onclick = function () {
             logoutPopup.close();
-            me.context.logout().then(function() {
+            me.context.logout().then(function () {
                 me.chats = {};
                 me.chatsContainer.innerHTML = '';
                 me.messagesContainer.innerHTML = '';
@@ -119,12 +119,12 @@ function WhisperUi(context) {
     this.sidebar.appendChild(this.chatsContainer);
 }
 
-WhisperUi.prototype.addChat = function(chat) {
+WhisperUi.prototype.addChat = function (chat) {
     var container = document.createElement('div');
     container.className = 'ui-chat';
     container.innerText = chat.id;
     var me = this;
-    container.onclick = function() {
+    container.onclick = function () {
         me.context.selectUser(chat);
         me.selectChat(chat);
     }
@@ -138,12 +138,12 @@ WhisperUi.prototype.addChat = function(chat) {
  *
  * @param chat{{id: string}}
  */
-WhisperUi.prototype.selectChat = function(chat) {
+WhisperUi.prototype.selectChat = function (chat) {
     this.messagesContainer.innerHTML = '';
     this.lastMessage.from = null;
     this.lastMessage.container = null;
-    for(var chatId in this.chats) {
-        if(this.chats[chatId].id === chat.id) {
+    for (var chatId in this.chats) {
+        if (this.chats[chatId].id === chat.id) {
             this.chats[chatId].container.className = 'ui-chat-selected ui-chat';
             this.context.selectChat(chat);
         } else {
@@ -156,16 +156,16 @@ WhisperUi.prototype.selectChat = function(chat) {
  * @param whisper {{sender: string, id: string, message: string, created: string, type: string}}
  * @param you string
  */
-WhisperUi.prototype.addMessage = function(whisper, you) {
-    if(whisper.type !== 'whisper' || this.messagesHistory[whisper.id]) {
+WhisperUi.prototype.addMessage = function (whisper, you) {
+    if (whisper.type !== 'whisper' || this.messagesHistory[whisper.id]) {
         return;
     }
     this.messagesHistory[whisper.id] = 1;
-    
+
     var usePrevious = this.lastMessage.from === whisper.sender;
     var myMessage = whisper.sender === you;
     var messageContainer = usePrevious ? this.lastMessage.container : document.createElement('div');
-    if(!usePrevious) {
+    if (!usePrevious) {
         var author = document.createElement('div');
         author.innerText = (myMessage ? "you" : whisper.sender) + " (" + whisper.created + "):";
         author.style.fontWeight = 'bold';
@@ -176,7 +176,7 @@ WhisperUi.prototype.addMessage = function(whisper, you) {
     var text = document.createElement('p');
     text.innerText = whisper.message;
     messageContainer.appendChild(text);
-    if(!usePrevious) {
+    if (!usePrevious) {
         this.messagesContainer.appendChild(messageContainer);
         this.lastMessage.from = whisper.sender;
         this.lastMessage.container = messageContainer;

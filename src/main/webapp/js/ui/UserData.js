@@ -18,7 +18,7 @@ function UserData(params) {
     this.errorContainer.style.color = 'red';
     this.popup.popup.appendChild(this.errorContainer);
 
-    if(params.id !== null) {
+    if (params.id !== null) {
         var id = document.createElement('input');
         this.id = id;
         id.id = 'acc_id';
@@ -30,7 +30,7 @@ function UserData(params) {
         this.popup.popup.appendChild(id);
         this.popup.popup.appendChild(document.createElement('br'));
     }
-    if(params.secretKey !== null) {
+    if (params.secretKey !== null) {
         var secretKey = document.createElement('textarea')
         this.secretKey = secretKey;
         secretKey.id = 'secret_id';
@@ -43,7 +43,7 @@ function UserData(params) {
         this.popup.popup.appendChild(secretKey);
         this.popup.popup.appendChild(document.createElement('br'));
     }
-    if(params.publicKey !== null) {
+    if (params.publicKey !== null) {
         var publicKey = document.createElement('textarea')
         publicKey.id = 'public_id';
         publicKey.value = params.publicKey;
@@ -57,7 +57,7 @@ function UserData(params) {
     }
 
     var me = this;
-    params.buttons.forEach(function(button) {
+    params.buttons.forEach(function (button) {
         var buttonHtml = document.createElement('button');
         buttonHtml.innerText = button.title;
         me.popup.popup.appendChild(buttonHtml);
@@ -65,11 +65,11 @@ function UserData(params) {
     })
 }
 
-UserData.prototype.close = function() {
+UserData.prototype.close = function () {
     this.popup.close();
 }
 
-UserData.prototype.error = function(error) {
+UserData.prototype.error = function (error) {
     this.errorContainer.innerText = error;
 }
 

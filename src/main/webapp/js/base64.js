@@ -1,4 +1,4 @@
-var Base64 = (function() {
+var Base64 = (function () {
     var lookup = []
 
     var revLookup = []
@@ -144,6 +144,7 @@ var Base64 = (function() {
 
         return parts.join('')
     }
+
     return {
         fromByteArray: fromByteArray,
         toByteArray: toByteArray

@@ -4,7 +4,8 @@ var Ajax = {
      */
     headers: null
 };
-function addHeaders(xhr, headers){
+
+function addHeaders(xhr, headers) {
     if (headers) {
         for (var i in headers) {
             if (headers.hasOwnProperty(i)) {
@@ -13,13 +14,14 @@ function addHeaders(xhr, headers){
         }
     }
 }
+
 Ajax.ajax = function (data, resolve, reject) {
     var xhr = Ajax.getXhr();
     xhr.open(data.type, data.url, true);
     addHeaders(xhr, Ajax.headers);
     addHeaders(xhr, data.headers);
     xhr.onload = function () {
-        if (xhr.status >199 && xhr.status < 300) {
+        if (xhr.status > 199 && xhr.status < 300) {
             resolve(Ajax.process(xhr, data.responseType), xhr);
         } else if (reject) {
             reject(xhr)
@@ -30,7 +32,7 @@ Ajax.ajax = function (data, resolve, reject) {
 };
 Ajax.process = function (xhr, t) {
     var response = xhr.responseText;
-    if(t === 'text' || !response) {
+    if (t === 'text' || !response) {
         return response;
     } else {
         return JSON.parse(xhr.responseText);

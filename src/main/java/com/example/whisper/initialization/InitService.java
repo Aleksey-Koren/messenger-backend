@@ -19,7 +19,6 @@ public class InitService {
     private final UtilRepository utilRepository;
     private final CustomerRepository customerRepository;
 
-
     @Transactional
     public void recreateServerUser() {
         utilRepository.findById(Utility.Key.SERVER_USER_ID.name())

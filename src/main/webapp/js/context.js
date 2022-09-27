@@ -8,10 +8,10 @@ function initContext() {
     }
 
     function loadChats() {
-        return Rest.doGet("chats?receiver=" + context.user.id).then(function(chats) {
+        return Rest.doGet("chats?receiver=" + context.user.id).then(function (chats) {
             context.chats = {};
-            chats.forEach(function(chat, index) {
-                if(index === 0) {
+            chats.forEach(function (chat, index) {
+                if (index === 0) {
                     context.activeChat = chat
                 }
                 context.chats[chat] = {id: chat, users: null};
@@ -23,23 +23,23 @@ function initContext() {
     }
 
     var storage = localStorage.getItem("whisper")
-    if(storage) {
+    if (storage) {
         try {
             var json = JSON.parse(storage);
             context.user = json.user;
             context.user.publicKey = Uint8Array.from(json.user.publicKey);
-            if(context.user.publicKey.length !== 32) {
+            if (context.user.publicKey.length !== 32) {
                 throw new Error("public key not valid length")
             }
             context.user.secretKey = Uint8Array.from(json.user.secretKey);
-            if(context.user.secretKey.length !== 32) {
+            if (context.user.secretKey.length !== 32) {
                 throw new Error("private key not valid length")
             }
             context.chats = {};
             context.activeChat = json.activeChat;
             context.users = {};
             context.users[context.user.id] = context.user;
-            json.chats.forEach(function(id) {
+            json.chats.forEach(function (id) {
                 context.chats[id] = {
                     id: id,
                     users: null
@@ -52,7 +52,7 @@ function initContext() {
     }
     return new Promise(resolve => {
 
-        if(!context.user) {
+        if (!context.user) {
             var popupContainer = createPopup();
             var popup = popupContainer.popup;
 
@@ -66,7 +66,7 @@ function initContext() {
 
             var newUser = document.createElement("button");
             newUser.innerText = "I'm new user";
-            newUser.onclick = function() {
+            newUser.onclick = function () {
                 var keyPair = nacl.box.keyPair();
                 context.user = {
                     id: null,
@@ -74,7 +74,7 @@ function initContext() {
                     secretKey: keyPair.secretKey
                 }
                 console.log(context.user.publicKey);
-                Rest.doPost("/customers", {pk: context.user.publicKey.join(",")}).then(function(response) {
+                Rest.doPost("/customers", {pk: context.user.publicKey.join(",")}).then(function (response) {
                     context.user.id = response.id;
                     context.users[context.user.id] = context.user;
                     persistContext(context);
@@ -88,7 +88,7 @@ function initContext() {
                         buttons: [
                             {
                                 title: "Close window, I save it.",
-                                onclick: function() {
+                                onclick: function () {
                                     userData.close();
                                 }
                             }
@@ -96,7 +96,7 @@ function initContext() {
                     });
 
                     resolve(context);
-                }).catch(function(e) {
+                }).catch(function (e) {
                     var status = document.createElement('span');
                     status.innerText = e.status;
                     var message = document.createElement('span');
@@ -117,7 +117,7 @@ function initContext() {
 
             var existingUser = document.createElement('button');
             existingUser.innerText = "I'm already registered";
-            existingUser.onclick = function() {
+            existingUser.onclick = function () {
                 var loginPopup = new UserData({
                     id: '',
                     secretKey: '',
@@ -126,14 +126,14 @@ function initContext() {
                     buttons: [
                         {
                             title: "Back",
-                            onclick: function() {
+                            onclick: function () {
                                 loginPopup.close();
                             }
                         },
                         {
                             title: 'Next',
-                            onclick: function() {
-                                if(!loginPopup.id.value || !loginPopup.secretKey.value) {
+                            onclick: function () {
+                                if (!loginPopup.id.value || !loginPopup.secretKey.value) {
                                     return;
                                 }
                                 loginPopup.error('')
@@ -141,12 +141,12 @@ function initContext() {
                                     try {
                                         var publicKey = Uint8Array.from(user.pk
                                             .split(",")
-                                            .map(function(str) {
+                                            .map(function (str) {
                                                 return parseInt(str);
                                             }));
                                         var privateKey = Uint8Array.from(loginPopup.secretKey.value
                                             .split(",")
-                                            .map(function(str) {
+                                            .map(function (str) {
                                                 return parseInt(str);
                                             }));
 
@@ -155,7 +155,7 @@ function initContext() {
                                         self.crypto.getRandomValues(nonce)
                                         var encrypted = nacl.box(test, nonce, publicKey, privateKey);
                                         var decrypted = nacl.box.open(encrypted, nonce, publicKey, privateKey);
-                                        if("test" === uint8ToString(decrypted)) {
+                                        if ("test" === uint8ToString(decrypted)) {
                                             context.user = {
                                                 id: user.id,
                                                 publicKey: publicKey,
@@ -164,12 +164,12 @@ function initContext() {
                                             context.users = {};
                                             context.users[context.user.id] = context.user;
 
-                                            loadChats().then(function() {
+                                            loadChats().then(function () {
                                                 loginPopup.close();
                                                 popupContainer.close();
 
                                                 resolve(context);
-                                            }).catch(function(e) {
+                                            }).catch(function (e) {
                                                 loginPopup.error(e + '')
                                             })
                                         } else {
@@ -178,7 +178,7 @@ function initContext() {
                                     } catch (e) {
                                         loginPopup.error('Your private key invalid');
                                     }
-                                }).catch(function(e) {
+                                }).catch(function (e) {
                                     loginPopup.error("Something wrong, error status is: " + e.status);
                                 });
                             }
@@ -189,18 +189,18 @@ function initContext() {
             }
             popup.appendChild(existingUser);
         } else {
-            loadChats().then(function() {
+            loadChats().then(function () {
                 resolve(context)
-            }).catch(function(e) {
+            }).catch(function (e) {
                 var popup = createConfirm({
                     title: "Fail to load chats",
                     yes: {
                         title: "Reload",
-                        onclick: function() {
-                            loadChats().then(function() {
+                        onclick: function () {
+                            loadChats().then(function () {
                                 resolve(context);
                                 popup.close();
-                            }).catch(function(e) {
+                            }).catch(function (e) {
                                 console.log(e)
                             })
                         }
@@ -223,7 +223,7 @@ function persistContext(context) {
         chats: [],
         activeChat: context.activeChat
     };
-    for(var chatId in context.chats) {
+    for (var chatId in context.chats) {
         value.chats.push(chatId);
     }
     localStorage.setItem('whisper', JSON.stringify(value));

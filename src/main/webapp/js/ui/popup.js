@@ -6,25 +6,26 @@ function createPopup() {
     popup.className = "component-popup";
     document.body.appendChild(popup);
 
-    if(!createPopup.activeOverlay) {
+    if (!createPopup.activeOverlay) {
         createPopup.activeOverlay = document.createElement('div');
         createPopup.activeOverlay.className = 'component-overlay';
     }
-    if(!createPopup.activePopups) {
+    if (!createPopup.activePopups) {
         document.body.appendChild(createPopup.activeOverlay);
     }
     createPopup.activePopups++;
     return {
         popup: popup,
-        close: function() {
+        close: function () {
             popup.remove();
             createPopup.activePopups--;
-            if(!createPopup.activePopups) {
+            if (!createPopup.activePopups) {
                 createPopup.activeOverlay.remove();
             }
         }
     }
 }
+
 createPopup.activeOverlay = null;
 createPopup.activePopups = 0;
 
@@ -42,13 +43,13 @@ function createConfirm(params) {
     title.innerText = params.title;
     popup.popup.appendChild(title);
 
-    if(params.no) {
+    if (params.no) {
         var no = document.createElement('button');
         no.innerText = params.no.title;
         no.onclick = params.no.onclick
         popup.popup.appendChild(no);
     }
-    if(params.yes) {
+    if (params.yes) {
         var yes = document.createElement('button');
         yes.innerText = params.yes.title;
         yes.onclick = params.yes.onclick

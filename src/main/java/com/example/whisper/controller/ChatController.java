@@ -1,80 +1,68 @@
 package com.example.whisper.controller;
 
-import com.example.whisper.entity.Customer;
-import com.example.whisper.entity.Message;
-import com.example.whisper.repository.CustomerRepository;
-import com.example.whisper.repository.MessageRepository;
-import com.example.whisper.service.MessageService;
-import com.iwebpp.crypto.TweetNacl;
-import com.iwebpp.crypto.TweetNaclFast;
+import com.example.whisper.dto.CreateChatRequestDto;
+import com.example.whisper.dto.LeaveChatRequestDto;
+import com.example.whisper.dto.UpdateChatTitleRequestDto;
+import com.example.whisper.entity.Chat;
+import com.example.whisper.service.ChatService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
+import javax.validation.Valid;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("chats")
 @RequiredArgsConstructor
 public class ChatController {
 
-    private final MessageRepository messageRepository;
-    private final CustomerRepository customerRepository;
-    private final MessageService messageService;
+    private final ChatService chatService;
 
-    @GetMapping()
-    public List<Message> getChats(@RequestParam ("receiver") UUID receiver) {
-        return messageService.findChats(receiver);
+    @GetMapping("/{chatId}")
+    public ResponseEntity<Chat> findAllById(@PathVariable UUID chatId) {
+        return new ResponseEntity<>(chatService.findById(chatId), HttpStatus.OK);
     }
 
-    @GetMapping("{id}/participants")
-    public List<Customer> getParticipants(@PathVariable("id") UUID chatId) {
-        List<Message> messages = messageRepository.findAllByChatAndType(chatId, Message.MessageType.hello);
-        List<UUID> participants = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
-        if (participants.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            List<Customer> allById = customerRepository.findAllById(participants);
-            return allById;
-        }
+    @GetMapping("/customers/{customerId}")
+    public ResponseEntity<Page<Chat>> findAllWhereCustomerIsMember(@PathVariable UUID customerId, Pageable pageable) {
+        return new ResponseEntity<>(chatService.findAllWhereCustomerIdIsMember(customerId, pageable), HttpStatus.OK);
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<Void> leaveChat(@PathVariable("id") UUID chatId, Message message) {
-        UUID sender = message.getSender();
-        String nonce = message.getNonce();
-        String data = message.getData();
-        Optional<Customer> customerOpt = customerRepository.findById(sender);
-        if (customerOpt.isEmpty()) {
-            messageRepository.deleteMyChatMessages(sender, sender, chatId);
-            return ResponseEntity.ok().build();
-        }
-        Customer customer = customerOpt.get();
-        byte[] publicKey = Base64.getDecoder().decode(customer.getPk());
-
-        TweetNaclFast.Box.KeyPair kp = TweetNaclFast.Box.keyPair_fromSecretKey(publicKey);
-        TweetNaclFast.Box box = new TweetNaclFast.Box(publicKey, publicKey);
-
-        byte[] decrypted = box.open(Base64.getDecoder().decode(data), Base64.getDecoder().decode(nonce));
-        UUID result = UUID.fromString(new String(decrypted));
-
-        return ResponseEntity.badRequest().build();
+    @PostMapping("/")
+    public ResponseEntity<Chat> create(@RequestBody CreateChatRequestDto requestDto) {
+        return new ResponseEntity<>(chatService.create(requestDto), HttpStatus.CREATED);
     }
 
-    public static void main(String[] args) {
-        Base64.Decoder decoder = Base64.getDecoder();
-
-        byte[] frontendPublicKey = decoder.decode("N7h4GxkAA3ahKbh7UiLatJgZgNhVEiyPQGFzLz8whTg=");
-        byte[] backendPrivateKey = decoder.decode("gPeR6Skna3SAvPFCmUPLulSAAe32SscVvERnWuQt69o=");
-        byte[] nonce = decoder.decode("BNZsRNcMpAmwtMphoS3qfo6iIhDS3S5f");
-        byte[] encryptedString = decoder.decode("9NrhOr1GiYi+RwNXR69U8oA2wOYus4F/0rM=");
-
-        TweetNaclFast.Box box = new TweetNaclFast.Box(frontendPublicKey, backendPrivateKey);
-        byte[] decryptedString = box.open(encryptedString, nonce);
-
-        System.out.println("Decrypted: " + new String(decryptedString));
+    @PatchMapping("/{chatId}/title")
+    public ResponseEntity<Chat> updateTitleById(@PathVariable UUID chatId,
+                                                @RequestBody @Valid UpdateChatTitleRequestDto requestDto) {
+        return new ResponseEntity<>(chatService.updateTitleById(chatId, requestDto.getTitle()), HttpStatus.OK);
     }
+
+    @PutMapping("/{chatId}/customers/{customerId}")
+    public ResponseEntity<Chat> addCustomerToChat(@PathVariable UUID chatId, @PathVariable UUID customerId) {
+        return new ResponseEntity<>(chatService.addCustomer(chatId, customerId), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{chatId}/customers/{customerId}")
+    public ResponseEntity<Chat> removeCustomerFromChat(@PathVariable UUID chatId,
+                                                       @PathVariable UUID customerId,
+                                                       @RequestBody LeaveChatRequestDto requestDto) {
+        return new ResponseEntity<>(
+                chatService.removeCustomer(chatId, customerId, requestDto.getSecretText(), requestDto.getNonce()),
+                HttpStatus.OK);
+    }
+
 }

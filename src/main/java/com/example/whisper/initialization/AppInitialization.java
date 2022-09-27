@@ -21,7 +21,7 @@ public class AppInitialization {
         ApplicationContext applicationContext = event.getApplicationContext();
         AppProperties appProperties = applicationContext.getBean(AppProperties.class);
 
-        if(appProperties.getIsRecreateServerUserNeeded()) {
+        if (appProperties.getIsRecreateServerUserNeeded()) {
             initService.recreateServerUser();
         }
     }
