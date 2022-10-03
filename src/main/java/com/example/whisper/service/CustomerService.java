@@ -1,6 +1,5 @@
 package com.example.whisper.service;
 
-import com.example.whisper.dto.MemberResponseDto;
 import com.example.whisper.entity.Customer;
 
 import java.util.List;
@@ -11,8 +10,6 @@ public interface CustomerService {
     Customer findById(UUID id);
 
     List<Customer> findAllByIds(List<UUID> ids);
-
-    List<MemberResponseDto> findAllByChatId(UUID chatId);
 
     List<Customer> getDistinctCustomersWhichMembersOfChatsByCustomerId(UUID customerId);
 

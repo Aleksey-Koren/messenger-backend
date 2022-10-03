@@ -9,7 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("messages")
@@ -25,6 +30,25 @@ public class MessageController {
 
     private final MessageServiceImpl messageService;
     private final FileServiceImpl fileService;
+
+
+    @PostMapping
+    @Transactional
+    public ResponseEntity<List<Message>> sendMessage(@RequestBody List<Message> messages, @RequestParam UUID iam) {
+        System.out.println("----------------HTTP SEND MESSAGE----------------------------");
+        System.out.println("iam = " + iam);
+        System.out.println(messages);
+        return messageService.oldSendMessage(messages, iam);
+    }
+
+    @PutMapping("/title")
+    @Transactional
+    public List<Message> changeUserTitle(@RequestBody List<Message> messages, @RequestParam UUID iam) {
+        return messageService.updateUserTitle(messages)
+                .stream()
+                .filter(message -> message.getSender().equals(iam))
+                .collect(Collectors.toList());
+    }
 
     @GetMapping()
     public ResponseEntity<Page<Message>> getMessages(

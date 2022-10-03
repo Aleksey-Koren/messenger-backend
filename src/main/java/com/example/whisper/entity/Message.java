@@ -26,10 +26,12 @@ import java.util.UUID;
 public class Message {
 
     public enum MessageType {
-        CHAT, // Chat message (example: edit chat title)
-        WHISPER, // Just customer message
-        INVITE_CHAT, // Add customer to chat
-        LEAVE_CHAT, // Customer leave chat
+        hello, //0
+        iam, //1
+        whisper, //2
+        who, //3
+        server,
+        LEAVE_CHAT,
     }
 
     @Id

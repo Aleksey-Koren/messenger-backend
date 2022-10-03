@@ -1,5 +1,6 @@
 package com.example.whisper.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.AbstractWebSocketMessageBrokerConfigurer;
@@ -12,11 +13,20 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 @EnableWebSocketMessageBroker
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer implements WebSocketMessageBrokerConfigurer {
 
+    @Value("${web.socket.message-size-limit}")
+    private int messageSizeLimit;
+
+    @Value("${web.socket.send-time-limit}")
+    private int sendTimeLimit;
+
+    @Value("${web.socket.send-buffer-size-limit}")
+    private int sendBufferSizeLimit;
+
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-        registration.setMessageSizeLimit(200000); // default : 64 * 1024
-        registration.setSendTimeLimit(20 * 10000); // default : 10 * 10000
-        registration.setSendBufferSizeLimit(3 * 512 * 1024); // default : 512 * 1024
+        registration.setMessageSizeLimit(messageSizeLimit); // default : 64 * 1024
+        registration.setSendTimeLimit(sendTimeLimit); // default : 10 * 10000
+        registration.setSendBufferSizeLimit(sendBufferSizeLimit); // default : 512 * 1024
 
     }
 

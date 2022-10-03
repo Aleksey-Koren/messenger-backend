@@ -33,7 +33,8 @@ public class Chat {
     @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID id;
 
-    private String title;
+    @Type(type = "org.hibernate.type.UUIDCharType")
+    private UUID creatorId;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

@@ -1,6 +1,5 @@
 package com.example.whisper.controller;
 
-import com.example.whisper.dto.MemberResponseDto;
 import com.example.whisper.entity.Customer;
 import com.example.whisper.service.impl.CustomerServiceImpl;
 import com.example.whisper.service.impl.UtilServiceImpl;
@@ -45,11 +44,6 @@ public class CustomerController {
             @PathVariable UUID customerId) {
         return new ResponseEntity<>(
                 customerService.getDistinctCustomersWhichMembersOfChatsByCustomerId(customerId), HttpStatus.OK);
-    }
-
-    @GetMapping("/chats/{chatId}")
-    public ResponseEntity<List<MemberResponseDto>> findAllByChatId(@PathVariable UUID chatId) {
-        return new ResponseEntity<>(customerService.findAllByChatId(chatId), HttpStatus.OK);
     }
 
     @GetMapping("{id}")

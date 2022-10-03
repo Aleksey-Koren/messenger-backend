@@ -1,12 +1,7 @@
 package com.example.whisper.service.impl;
 
-import com.example.whisper.dto.MemberResponseDto;
-import com.example.whisper.entity.Administrator;
-import com.example.whisper.entity.Chat;
 import com.example.whisper.entity.Customer;
 import com.example.whisper.exceptions.ResourseNotFoundException;
-import com.example.whisper.repository.AdministratorRepository;
-import com.example.whisper.repository.ChatRepository;
 import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.CustomerService;
@@ -28,10 +23,8 @@ import java.security.PrivateKey;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -40,9 +33,7 @@ import java.util.UUID;
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
-    private final AdministratorRepository administratorRepository;
 
     @Override
     public Customer findById(UUID id) {
@@ -55,36 +46,6 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<Customer> findAllByIds(List<UUID> ids) {
         return customerRepository.findAllById(ids);
-    }
-
-    @Override
-    public List<MemberResponseDto> findAllByChatId(UUID chatId) {
-        Chat chat = chatRepository
-                .findById(chatId)
-                .orElseThrow(() -> new ResourseNotFoundException("Chat not found by id!"));
-
-        List<Customer> customerList = customerRepository.findAllByChat(chat);
-        List<Administrator> administratorList = administratorRepository.findAllByChatId(chatId);
-
-        List<MemberResponseDto> memberResponseDtoList = new ArrayList<>();
-
-        for (int i = 0; i < customerList.size(); i++) {
-            int finalI = i;
-            Optional<Administrator> optionalAdministrator = administratorList
-                    .stream()
-                    .filter(administrator -> administrator.getUserId().equals(customerList.get(finalI).getId()))
-                    .findFirst();
-
-            String role = optionalAdministrator.isPresent() ? optionalAdministrator.get().getUserType().toString() : "NONE";
-            MemberResponseDto memberResponseDto = new MemberResponseDto();
-            memberResponseDto.setId(customerList.get(finalI).getId());
-            memberResponseDto.setPk(customerList.get(finalI).getPk());
-            memberResponseDto.setRole(role);
-
-            memberResponseDtoList.add(memberResponseDto);
-        }
-
-        return memberResponseDtoList;
     }
 
     @Override

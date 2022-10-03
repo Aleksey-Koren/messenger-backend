@@ -25,7 +25,6 @@ import java.util.UUID;
 public class Administrator {
 
     public enum UserType {
-        SUPER_ADMINISTRATOR,
         ADMINISTRATOR,
         MODERATOR,
     }

@@ -20,4 +20,10 @@ spring:
       ddl-auto: update
       naming.physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
     database-platform: org.hibernate.dialect.MariaDB103Dialect
-    show-sql: true
+    show-sql: false
+
+web:
+  socket:
+    message-size-limit: 200000
+    send-time-limit: 200000
+    send-buffer-size-limit: 1572864
