@@ -20,15 +20,4 @@ public class WhisperApplication {
         SpringApplication.run(WhisperApplication.class, args);
     }
 
-    @Bean
-    public CorsFilter corsFilter() {
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        final CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOriginPattern("*");
-        config.addAllowedHeader("*");
-        config.setAllowedMethods(Arrays.stream(HttpMethod.values()).map(HttpMethod::name).collect(Collectors.toList()));
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
 }

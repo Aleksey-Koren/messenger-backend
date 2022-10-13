@@ -27,12 +27,12 @@ public class AdministratorServiceImpl implements AdministratorService {
     private final CustomerRepository customerRepository;
 
     @Override
-    public Administrator createRole(UUID customerId, UUID chatId, Administrator.UserType role, UUID administratorId) {
+    public Administrator createRole(UUID customerId, UUID chatId, Administrator.UserType role) {
         Customer customer = getCustomerById(customerId);
         Chat chat = getChatById(chatId);
         checkMemberOfChat(chat, customer);
         checkCustomerIfRoleIsAlreadyExists(customerId, chatId);
-        checkAdministratorOfChat(administratorId, chatId);
+//        checkAdministratorOfChat(administratorId, chatId);
 
         Administrator administrator = new Administrator();
         administrator.setId(UUID.randomUUID());

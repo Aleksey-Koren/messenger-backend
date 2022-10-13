@@ -34,11 +34,11 @@ public class MessageController {
 
     @PostMapping
     @Transactional
-    public ResponseEntity<List<Message>> sendMessage(@RequestBody List<Message> messages, @RequestParam UUID iam) {
+    public void sendMessage(@RequestBody List<Message> messages, @RequestParam UUID iam) {
         System.out.println("----------------HTTP SEND MESSAGE----------------------------");
         System.out.println("iam = " + iam);
         System.out.println(messages);
-        return messageService.oldSendMessage(messages, iam);
+        messageService.oldSendMessage(messages, iam);
     }
 
     @PutMapping("/title")

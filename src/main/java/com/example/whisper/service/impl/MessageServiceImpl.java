@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -79,10 +78,9 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
-
-    public ResponseEntity<List<Message>> oldSendMessage(List<Message> messages, UUID iam) {
-        if (!isValid(messages)) {
-            return ResponseEntity.badRequest().build();
+    public void oldSendMessage(List<Message> messages, UUID iam) {
+        if (!MessageValidator.isValid(messages)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
         setInstantData(messages);
@@ -90,98 +88,69 @@ public class MessageServiceImpl implements MessageService {
         Message controlMessage = messages.get(0);
         List<Message> out = new ArrayList<>();
         switch (controlMessage.getType()) {
-            case whisper -> {
-                out = whisperMessageService.processMessages(messages);
-            }
-            case who -> {
-                List<Message> foundedMessages = messageRepository.findByChatAndSenderAndReceiverAndType(
-                        controlMessage.getChat(),
-                        controlMessage.getSender(),
-                        controlMessage.getReceiver(),
-                        controlMessage.getType()
-                );
-                if (foundedMessages.isEmpty()) {
-                    out = messageRepository.saveAll(messages);
-                }
-            }
-            case hello -> {
-                List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
-                if (!receivers.isEmpty()) {
-                    messageRepository.deleteHelloMessages(controlMessage.getChat(), Message.MessageType.hello, receivers);
-                }
-                if (controlMessage.getSender().equals(controlMessage.getReceiver())) {
-                    Chat chat = new Chat();
-                    chat.setId(controlMessage.getChat());
-                    chat.setCreatorId(controlMessage.getSender());
-                    chatService.create(chat);
-                }
-                out = messageRepository.saveAll(messages);
-
-            }
-            case iam -> {
-                List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
-
-                messageRepository.deleteAllByChatAndSenderInAndReceiverAndType(
-                        controlMessage.getChat(),
-                        receivers,
-                        controlMessage.getSender(),
-                        Message.MessageType.who);
-
-                List<Message> messageList = messageRepository.findByChatAndSenderAndReceiverAndType(
-                        controlMessage.getChat(),
-                        controlMessage.getSender(),
-                        controlMessage.getReceiver(), Message.MessageType.iam);
-                if (messageList.size() == 0) {
-                    out = messageRepository.saveAll(messages);
-                } else {
-                    out = messages;
-                }
-            }
+            case whisper -> out = whisperMessageService.processMessages(messages);
+            case who -> out = handleWhoMessages(messages, controlMessage);
+            case hello -> out = handleHelloMessages(messages, controlMessage);
+            case iam -> out = handleAimMessages(messages, controlMessage);
             case server -> {
                 Message decrypted = serverMessageService.decryptServerMessage(messages);
                 serverMessageService.processServerMessage(decrypted);
             }
-            case LEAVE_CHAT -> {
-                out = messages;
-            }
+            case LEAVE_CHAT -> out = messages;
             default -> {
                 log.warn("Unknown type of message");
-                ResponseEntity.badRequest().build();
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
             }
         }
-        for (Message message : out) {
+
+        for (Message message : out.stream().filter(message -> message.getReceiver().equals(iam)).toList()) {
             simpMessagingTemplate
                     .convertAndSendToUser(message.getReceiver().toString(), "/private", message);
         }
-
-        return ResponseEntity.ok(out.stream()
-                .filter(message -> message.getReceiver().equals(iam))
-                .collect(Collectors.toList()));
     }
 
-    private boolean isValid(List<Message> messages) {
-        if (isEmpty(messages)) {
-            return false;
-        }
-        return areFieldsCorrect(messages);
+    private List<Message> handleWhoMessages(List<Message> messages, Message controlMessage) {
+        List<Message> foundedMessages = messageRepository.findByChatAndSenderAndReceiverAndType(
+                controlMessage.getChat(),
+                controlMessage.getSender(),
+                controlMessage.getReceiver(),
+                controlMessage.getType()
+        );
+
+        return foundedMessages.isEmpty() ? messageRepository.saveAll(messages) : new ArrayList<>();
     }
 
-    private boolean areFieldsCorrect(List<Message> messages) {
-        Message controlMessage = messages.get(0);
-        for (Message message : messages) {
-            if (isEmpty(message.getSender()) ||
-                    isEmpty(message.getReceiver()) ||
-                    message.getType() == null ||
-                    !message.getType().equals(controlMessage.getType()) ||
-                    (!(Message.MessageType.who.equals(message.getType())) && isEmpty(message.getData())) && isEmpty(message.getAttachments()) ||
-                    !message.getSender().equals(controlMessage.getSender()) ||
-                    controlMessage.getChat() == null ? message.getChat() != null : !controlMessage.getChat().equals(message.getChat()) ||
-                    !((controlMessage.getAttachments() != null) == (message.getAttachments() != null))
-            ) {
-                return false;
-            }
+    private List<Message> handleHelloMessages(List<Message> messages, Message controlMessage) {
+        List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
+        if (!receivers.isEmpty()) {
+            messageRepository.deleteHelloMessages(controlMessage.getChat(), Message.MessageType.hello, receivers);
         }
-        return true;
+        if (controlMessage.getSender().equals(controlMessage.getReceiver())) {
+            Chat chat = new Chat();
+            chat.setId(controlMessage.getChat());
+            chat.setCreatorId(controlMessage.getSender());
+            chatService.create(chat);
+        } else {
+            chatService.addCustomerToChat(controlMessage.getReceiver(), controlMessage.getChat());
+        }
+        return messageRepository.saveAll(messages);
+    }
+
+    private List<Message> handleAimMessages(List<Message> messages, Message controlMessage) {
+        List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
+
+        messageRepository.deleteAllByChatAndSenderInAndReceiverAndType(
+                controlMessage.getChat(),
+                receivers,
+                controlMessage.getSender(),
+                Message.MessageType.who);
+
+        List<Message> messageList = messageRepository.findByChatAndSenderAndReceiverAndType(
+                controlMessage.getChat(),
+                controlMessage.getSender(),
+                controlMessage.getReceiver(), Message.MessageType.iam);
+
+        return messageList.size() == 0 ? messageRepository.saveAll(messages) : messages;
     }
 
     public List<Message> findChats(UUID receiver) {

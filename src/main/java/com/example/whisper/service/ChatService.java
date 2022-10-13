@@ -14,4 +14,6 @@ public interface ChatService {
 
     Chat create(Chat chat);
 
+    Chat addCustomerToChat(UUID customerId, UUID chatId);
+
 }

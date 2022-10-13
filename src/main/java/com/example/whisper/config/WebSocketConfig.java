@@ -27,7 +27,6 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer im
         registration.setMessageSizeLimit(messageSizeLimit); // default : 64 * 1024
         registration.setSendTimeLimit(sendTimeLimit); // default : 10 * 10000
         registration.setSendBufferSizeLimit(sendBufferSizeLimit); // default : 512 * 1024
-
     }
 
     @Override

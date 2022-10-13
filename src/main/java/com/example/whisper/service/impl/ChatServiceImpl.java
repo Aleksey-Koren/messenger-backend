@@ -50,6 +50,15 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    public Chat addCustomerToChat(UUID customerId, UUID chatId) {
+        Customer customer = findCustomerById(customerId);
+        Chat chat = findById(chatId);
+        chat.getMembers().add(customer);
+
+        return chatRepository.save(chat);
+    }
+
+    @Override
     public Page<Chat> findAllWhereCustomerIdIsMember(UUID id, Pageable pageable) {
         Customer customer = findCustomerById(id);
         return chatRepository.findAllWhereCustomerIsMember(customer, pageable);

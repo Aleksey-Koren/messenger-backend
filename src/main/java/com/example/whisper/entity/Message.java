@@ -32,6 +32,7 @@ public class Message {
         who, //3
         server,
         LEAVE_CHAT,
+        ASSIGN_ROLE,
     }
 
     @Id
