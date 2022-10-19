@@ -1,6 +1,5 @@
 package com.example.whisper.dto;
 
-import com.example.whisper.entity.Administrator;
 import lombok.Data;
 
 import java.util.UUID;

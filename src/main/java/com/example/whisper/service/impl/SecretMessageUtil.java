@@ -22,7 +22,6 @@ public class SecretMessageUtil {
     private final CryptServiceImpl cryptService;
     private final UtilRepository utilRepository;
     private final CustomerRepository customerRepository;
-    private final MessageRepository messageRepository;
 
     public String decryptSecretText(UUID senderId, String secretText, String nonce) {
         Customer sender = customerRepository.findById(senderId).orElseThrow(() -> {

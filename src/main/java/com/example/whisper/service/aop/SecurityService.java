@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,10 +20,17 @@ public class SecurityService {
     private final SecretMessageUtil secretMessageUtil;
     private final AdministratorRepository administratorRepository;
 
-    public boolean hasRole(Map<String, String> headers, UUID chatId, Set<String> roles) {
-        UUID senderUUID = UUID.fromString(headers.get("sender"));
-        String encryptUUID = headers.get("token");
-        String nonce = headers.get("nonce");
+    public boolean hasRoleInChat(String token, UUID chatId, Set<String> roles) {
+        String[] parsedToken = token.split("_");
+
+        if (parsedToken.length != 3) {
+            log.error("Invalid token!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token!");
+        }
+
+        String encryptUUID = parsedToken[0];
+        String nonce = parsedToken[1];
+        UUID senderUUID = UUID.fromString(parsedToken[2]);
 
         UUID decryptUUID = UUID.fromString(secretMessageUtil.decryptSecretText(senderUUID, encryptUUID, nonce));
         if (senderUUID.compareTo(decryptUUID) > 0) {

@@ -3,15 +3,18 @@ package com.example.whisper.service.impl;
 import com.example.whisper.entity.Administrator;
 import com.example.whisper.entity.Chat;
 import com.example.whisper.entity.Customer;
+import com.example.whisper.entity.Message;
 import com.example.whisper.exceptions.ResourseNotFoundException;
 import com.example.whisper.repository.AdministratorRepository;
 import com.example.whisper.repository.ChatRepository;
 import com.example.whisper.repository.CustomerRepository;
+import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 import java.util.UUID;
@@ -23,6 +26,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatRepository chatRepository;
     private final CustomerRepository customerRepository;
     private final AdministratorRepository administratorRepository;
+    private final MessageRepository messageRepository;
 
     @Override
     public Chat findById(UUID id) {
@@ -56,6 +60,19 @@ public class ChatServiceImpl implements ChatService {
         chat.getMembers().add(customer);
 
         return chatRepository.save(chat);
+    }
+
+    @Override
+    @Transactional
+    public void removeCustomerFromChat(UUID customerId, UUID chatId) {
+        Customer customer = findCustomerById(customerId);
+        Chat chat = findById(chatId);
+        chat.getMembers().remove(customer);
+        messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.iam);
+        messageRepository.deleteAllBySenderAndChatAndType(customerId, chatId, Message.MessageType.iam);
+        messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.hello);
+        administratorRepository.deleteByUserIdAndChatId(customerId, chatId);
+        chatRepository.save(chat);
     }
 
     @Override

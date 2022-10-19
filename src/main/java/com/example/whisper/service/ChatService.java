@@ -16,4 +16,6 @@ public interface ChatService {
 
     Chat addCustomerToChat(UUID customerId, UUID chatId);
 
+    void removeCustomerFromChat(UUID customerId, UUID chatId);
+
 }

@@ -103,7 +103,7 @@ public class MessageServiceImpl implements MessageService {
             }
         }
 
-        for (Message message : out.stream().filter(message -> message.getReceiver().equals(iam)).toList()) {
+        for (Message message : out) {
             simpMessagingTemplate
                     .convertAndSendToUser(message.getReceiver().toString(), "/private", message);
         }

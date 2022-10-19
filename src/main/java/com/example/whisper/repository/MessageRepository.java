@@ -10,16 +10,12 @@ import org.springframework.data.repository.query.Param;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface MessageRepository extends JpaRepository<Message, UUID>, JpaSpecificationExecutor<Message> {
 
     @Query("select message from Message message where (message.receiver = :receiver and message.type = :messageType)")
     List<Message> findChats(@Param("receiver") UUID receiver, @Param("messageType") Message.MessageType messageType);
-
-//    Optional<Message> findBySenderAndReceiverAndChatAndType()
-
 
     @Query("select message from Message message where (message.chat = :chat and message.type = :messageType)")
     List<Message> findAllByChatAndType(@Param("chat") UUID chat, @Param("messageType") Message.MessageType messageType);

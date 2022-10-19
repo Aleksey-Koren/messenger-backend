@@ -1,7 +1,7 @@
 package com.example.whisper.repository;
 
-import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Chat;
+import com.example.whisper.entity.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

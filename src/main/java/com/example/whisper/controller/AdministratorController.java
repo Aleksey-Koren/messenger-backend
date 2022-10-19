@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.util.List;
+import java.util.UUID;
 
+/**
+ * @author Maksim Semianko
+ */
 @RestController
 @RequestMapping("administrators")
 @RequiredArgsConstructor
@@ -25,24 +29,25 @@ public class AdministratorController {
 
     private final AdministratorService administratorService;
 
-    @GetMapping("/")
-    public ResponseEntity<String> get() {
-        return new ResponseEntity<>("Hello", HttpStatus.OK);
+    @GetMapping("/chats/{chatId}")
+    public ResponseEntity<List<Administrator>> findAllByChatId(@PathVariable UUID chatId) {
+        return new ResponseEntity<>(administratorService.findAllByChatId(chatId), HttpStatus.OK);
     }
 
     @PostMapping("/")
-    @PreAuthorize("@securityService.hasRole(#headers, #roleDto.chatId, 'ADMINISTRATOR,MODERATOR')")
-    public ResponseEntity<Administrator> assignRole(@RequestHeader Map<String, String> headers,
+    @PreAuthorize("@securityService.hasRoleInChat(#token, #roleDto.chatId, 'ADMINISTRATOR')")
+    public ResponseEntity<Administrator> assignRole(@RequestHeader("Token") String token,
                                                     @RequestBody RequestRoleDto roleDto) {
-        System.out.println("assignRole");
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return new ResponseEntity<>(administratorService.createRoleByCustomerIdAndChatId(roleDto), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/customers/{customerId}/chats/{chatId}")
-    public ResponseEntity<Administrator> denyRole(@PathVariable String customerId, @PathVariable String chatId) {
-        return new ResponseEntity<>
-                (null,
-                        HttpStatus.OK);
+    @PreAuthorize("@securityService.hasRoleInChat(#token, #chatId, 'ADMINISTRATOR')")
+    public ResponseEntity<Void> denyRole(@RequestHeader("Token") String token,
+                                         @PathVariable UUID customerId,
+                                         @PathVariable UUID chatId) {
+        administratorService.deleteRoleByCustomerIdAndChatId(customerId, chatId);
+        return ResponseEntity.ok().build();
     }
 
 }

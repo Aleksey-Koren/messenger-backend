@@ -1,19 +1,22 @@
 package com.example.whisper.service.impl;
 
+import com.example.whisper.dto.RequestRoleDto;
 import com.example.whisper.entity.Administrator;
-import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Chat;
+import com.example.whisper.entity.Customer;
 import com.example.whisper.exceptions.ResourseNotFoundException;
 import com.example.whisper.repository.AdministratorRepository;
-import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.ChatRepository;
+import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.service.AdministratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,12 +30,21 @@ public class AdministratorServiceImpl implements AdministratorService {
     private final CustomerRepository customerRepository;
 
     @Override
-    public Administrator createRole(UUID customerId, UUID chatId, Administrator.UserType role) {
+    public List<Administrator> findAllByChatId(UUID chatId) {
+        return administratorRepository.findAllByChatId(chatId);
+    }
+
+    @Override
+    @Transactional
+    public Administrator createRoleByCustomerIdAndChatId(RequestRoleDto roleDto) {
+        UUID customerId = roleDto.getCustomerId();
+        UUID chatId = roleDto.getChatId();
+        Administrator.UserType role = Administrator.UserType.valueOf(roleDto.getRole());
+
         Customer customer = getCustomerById(customerId);
         Chat chat = getChatById(chatId);
         checkMemberOfChat(chat, customer);
-        checkCustomerIfRoleIsAlreadyExists(customerId, chatId);
-//        checkAdministratorOfChat(administratorId, chatId);
+        checkCustomerIfRoleIsAlreadyExists(customerId, chatId, role);
 
         Administrator administrator = new Administrator();
         administrator.setId(UUID.randomUUID());
@@ -44,9 +56,7 @@ public class AdministratorServiceImpl implements AdministratorService {
     }
 
     @Override
-    public void deleteRole(UUID customerId, UUID chatId, UUID administratorId) {
-        checkAdministratorOfChat(administratorId, chatId);
-
+    public void deleteRoleByCustomerIdAndChatId(UUID customerId, UUID chatId) {
         administratorRepository.deleteByUserIdAndChatId(customerId, chatId);
     }
 
@@ -64,24 +74,17 @@ public class AdministratorServiceImpl implements AdministratorService {
 
     private void checkMemberOfChat(Chat chat, Customer customer) {
         if (!chat.getMembers().contains(customer)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer not member of chat!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer is not member of chat!");
         }
     }
 
-    private void checkCustomerIfRoleIsAlreadyExists(UUID customerId, UUID chatId) {
+    private void checkCustomerIfRoleIsAlreadyExists(UUID customerId, UUID chatId, Administrator.UserType role) {
         Optional<Administrator> optionalAdministrator =
-                administratorRepository.findByUserIdAndChatId(customerId, chatId);
+                administratorRepository.findByUserIdAndChatIdAndUserType(customerId, chatId, role);
         if (optionalAdministrator.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer already has a role in chat!");
-        }
-    }
-
-    private void checkAdministratorOfChat(UUID administratorId, UUID chatId) {
-        Optional<Administrator> optionalAdministrator = administratorRepository.findById(administratorId);
-        if (optionalAdministrator.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Administrator was not found!");
-        } else if (!optionalAdministrator.get().getChatId().equals(chatId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid administrator of chat!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer already has this role in chat!");
+        } else {
+            administratorRepository.deleteAllByUserIdAndChatId(customerId, chatId);
         }
     }
 

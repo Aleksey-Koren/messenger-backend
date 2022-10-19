@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Type;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -36,7 +37,7 @@ public class Chat {
     @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID creatorId;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "chats_m2m_customers",
             joinColumns = {@JoinColumn(name = "chat_id")},

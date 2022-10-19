@@ -108,6 +108,16 @@ public class ServerMessageServiceImpl implements ServerMessageService {
                         .deleteAllByReceiverAndChatAndType(
                                 decrypted.getSender(),
                                 decrypted.getChat(),
+                                Message.MessageType.iam);
+                messageRepository
+                        .deleteAllBySenderAndChatAndType(
+                                decrypted.getSender(),
+                                decrypted.getChat(),
+                                Message.MessageType.iam);
+                messageRepository
+                        .deleteAllByReceiverAndChatAndType(
+                                decrypted.getSender(),
+                                decrypted.getChat(),
                                 Message.MessageType.hello);
             }
             case LEAVE_CHAT_WITH_DELETE_OWN_MESSAGES -> {
