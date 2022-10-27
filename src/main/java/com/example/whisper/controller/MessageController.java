@@ -35,9 +35,6 @@ public class MessageController {
     @PostMapping
     @Transactional
     public void sendMessage(@RequestBody List<Message> messages, @RequestParam UUID iam) {
-        System.out.println("----------------HTTP SEND MESSAGE----------------------------");
-        System.out.println("iam = " + iam);
-        System.out.println(messages);
         messageService.oldSendMessage(messages, iam);
     }
 

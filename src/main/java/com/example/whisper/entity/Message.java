@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Type;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -55,10 +56,12 @@ public class Message {
     @NotNull
     private MessageType type;
 
+    @Column(length = 1024)
     private String data;
 
     private String attachments;
 
+    @Column(length = 373)
     private String nonce;
 
     private Instant created;

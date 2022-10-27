@@ -57,4 +57,13 @@ public class ChatController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/{chatId}/customers/{customerId}/leave-chat")
+    @PreAuthorize("@securityService.isOwner(#token, #customerId)")
+    public ResponseEntity<Void> leaveChat(@RequestHeader("Token") String token,
+                                          @PathVariable UUID chatId,
+                                          @PathVariable UUID customerId) {
+        chatService.leaveChat(chatId, customerId, false);
+        return ResponseEntity.ok().build();
+    }
+
 }

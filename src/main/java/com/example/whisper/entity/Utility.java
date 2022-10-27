@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -19,6 +20,8 @@ public class Utility {
 
     @Id
     private String utilKey;
+
+    @Column(length = 2048)
     private String utilValue;
 
     public enum Key {

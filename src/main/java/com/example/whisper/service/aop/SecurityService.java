@@ -2,7 +2,7 @@ package com.example.whisper.service.aop;
 
 import com.example.whisper.entity.Administrator;
 import com.example.whisper.repository.AdministratorRepository;
-import com.example.whisper.service.impl.SecretMessageUtil;
+import com.example.whisper.service.impl.DecoderUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,29 +17,43 @@ import java.util.UUID;
 @Slf4j
 public class SecurityService {
 
-    private final SecretMessageUtil secretMessageUtil;
+    private final DecoderUtil decoderUtil;
     private final AdministratorRepository administratorRepository;
 
+    public boolean isOwner(String token, UUID ownerId) {
+        UUID decryptUUID = UUID.fromString(decoderUtil.decryptToken(token, ownerId));
+        return ownerId.compareTo(decryptUUID) == 0;
+    }
+
+    /**
+     * Method that check that user has role in chat.
+     *
+     * @param token  contains encryptUUID + nonce + senderUUID
+     * @param chatId desired chat for checking role in him
+     * @param roles  permission for method
+     * @return true or false
+     */
     public boolean hasRoleInChat(String token, UUID chatId, Set<String> roles) {
-        String[] parsedToken = token.split("_");
-
-        if (parsedToken.length != 3) {
-            log.error("Invalid token!");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token!");
-        }
-
-        String encryptUUID = parsedToken[0];
-        String nonce = parsedToken[1];
-        UUID senderUUID = UUID.fromString(parsedToken[2]);
-
-        UUID decryptUUID = UUID.fromString(secretMessageUtil.decryptSecretText(senderUUID, encryptUUID, nonce));
-        if (senderUUID.compareTo(decryptUUID) > 0) {
+        if (!isValidToken(token)) {
             return false;
         }
 
-        Administrator administrator = administratorRepository.findByUserIdAndChatId(senderUUID, chatId)
+        Administrator administrator = administratorRepository
+                .findByUserIdAndChatId(getSenderIdFromToken(token), chatId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "User has no role in chat!"));
 
         return roles.contains(administrator.getUserType().name());
     }
+
+    private boolean isValidToken(String token) {
+        UUID decryptUUID = UUID.fromString(decoderUtil.decryptToken(token));
+        UUID senderUUID = getSenderIdFromToken(token);
+
+        return senderUUID.compareTo(decryptUUID) == 0;
+    }
+
+    private UUID getSenderIdFromToken(String token) {
+        return UUID.fromString(token.split("_")[2]);
+    }
+
 }

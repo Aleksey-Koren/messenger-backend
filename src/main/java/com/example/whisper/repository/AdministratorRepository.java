@@ -27,4 +27,6 @@ public interface AdministratorRepository extends JpaRepository<Administrator, UU
 
     @Transactional
     void deleteAllByUserIdAndChatId(UUID userId, UUID chatId);
+
+    void deleteAllByChatId(UUID chatId);
 }

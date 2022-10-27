@@ -11,16 +11,20 @@ import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.ChatService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatServiceImpl implements ChatService {
 
     private final ChatRepository chatRepository;
@@ -76,6 +80,36 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    @Transactional
+    public void leaveChat(UUID chatId, UUID customerId, Boolean withDeleteMessages) {
+        Chat chat = findById(chatId);
+        Customer customer = findCustomerById(customerId);
+
+//        String decryptSecretText = decoderUtil.decryptToken(token);
+//        ServerMessageType serverMessageType = serverMessageService.getServerMessageType(decryptSecretText);
+
+//        switch (serverMessageType) {
+//            case LEAVE_CHAT -> {
+        messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.iam);
+        messageRepository.deleteAllBySenderAndChatAndType(customerId, chatId, Message.MessageType.iam);
+        messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.hello);
+        chat.getMembers().remove(customer);
+        chatRepository.save(chat);
+
+        if (administratorRepository.findByUserIdAndChatId(customerId, chatId).isPresent()) {
+            administratorRepository.deleteByUserIdAndChatId(customerId, chatId);
+            assignRolesToOtherUsersOfChat(chat);
+        }
+//            }
+//            case LEAVE_CHAT_WITH_DELETE_OWN_MESSAGES -> {
+//                messageRepository.deleteAllByReceiverAndSenderAndChat(customerId, customerId, chatId);
+//            }
+//            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid server message type!");
+//        }
+
+    }
+
+    @Override
     public Page<Chat> findAllWhereCustomerIdIsMember(UUID id, Pageable pageable) {
         Customer customer = findCustomerById(id);
         return chatRepository.findAllWhereCustomerIsMember(customer, pageable);
@@ -85,5 +119,37 @@ public class ChatServiceImpl implements ChatService {
         return customerRepository
                 .findById(uuid)
                 .orElseThrow(() -> new ResourseNotFoundException("Customer not found by id!"));
+    }
+
+    private void assignRolesToOtherUsersOfChat(Chat chat) {
+
+        List<Administrator> administratorList = administratorRepository.findAllByChatId(chat.getId());
+
+        List<Administrator> listWithUserTypeAdmin = administratorList
+                .stream()
+                .filter(item -> item.getUserType().equals(Administrator.UserType.ADMINISTRATOR))
+                .toList();
+
+        if (listWithUserTypeAdmin.size() == 0) {
+            if (administratorList.size() != 0) {
+                administratorList.forEach(item -> item.setUserType(Administrator.UserType.ADMINISTRATOR));
+            } else {
+                administratorRepository.deleteAllByChatId(chat.getId());
+                Set<Customer> members = chat.getMembers();
+                Set<Administrator> administrators = new HashSet<>();
+                for (Customer member : members) {
+                    Administrator administrator = Administrator.builder()
+                            .id(UUID.randomUUID())
+                            .chatId(chat.getId())
+                            .userId(member.getId())
+                            .userType(Administrator.UserType.ADMINISTRATOR)
+                            .build();
+
+                    administrators.add(administrator);
+                }
+
+                administratorRepository.saveAll(administrators);
+            }
+        }
     }
 }

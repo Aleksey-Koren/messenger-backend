@@ -8,6 +8,9 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.NoSuchPaddingException;
+import java.security.NoSuchAlgorithmException;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -16,7 +19,7 @@ public class AppInitialization {
     private final InitService initService;
 
     @EventListener(ContextRefreshedEvent.class)
-    public void postContextInitialization(ContextRefreshedEvent event) {
+    public void postContextInitialization(ContextRefreshedEvent event) throws NoSuchPaddingException, NoSuchAlgorithmException {
         log.info("Initialization method has started");
         ApplicationContext applicationContext = event.getApplicationContext();
         AppProperties appProperties = applicationContext.getBean(AppProperties.class);

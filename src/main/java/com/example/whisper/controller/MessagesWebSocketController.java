@@ -2,7 +2,7 @@ package com.example.whisper.controller;
 
 import com.example.whisper.entity.Message;
 import com.example.whisper.service.impl.MessageServiceImpl;
-import com.example.whisper.service.impl.SecretMessageUtil;
+import com.example.whisper.service.impl.DecoderUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -22,7 +22,7 @@ import java.util.UUID;
 public class MessagesWebSocketController {
 
     private final MessageServiceImpl messageService;
-    private final SecretMessageUtil secretMessageUtil;
+    private final DecoderUtil secretMessageUtil;
 
     @MessageMapping("/chat/addUser")
     public void addUser(@Payload String uuid, SimpMessageHeaderAccessor headerAccessor) {

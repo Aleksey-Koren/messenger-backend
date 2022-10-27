@@ -6,8 +6,6 @@ import java.util.UUID;
 
 public interface ServerMessageService {
 
-    String decryptSecretText(UUID senderId, String secretText, String nonce);
-
     ServerMessageType getServerMessageType(String data);
 
 }

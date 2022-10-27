@@ -18,4 +18,6 @@ public interface ChatService {
 
     void removeCustomerFromChat(UUID customerId, UUID chatId);
 
+    void leaveChat(UUID chatId, UUID customerId, Boolean withDeleteMessages);
+
 }
