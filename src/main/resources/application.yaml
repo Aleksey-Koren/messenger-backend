@@ -1,6 +1,7 @@
 app:
   init-props:
     is_recreate_server_user_needed: true
+    key-rsa-size: 2048
   message:
     lifespan: 86400000
     #    lifespan: 10000

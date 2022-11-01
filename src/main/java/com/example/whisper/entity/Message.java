@@ -56,12 +56,12 @@ public class Message {
     @NotNull
     private MessageType type;
 
-    @Column(length = 1024)
+    @Column(length = 344)
     private String data;
 
     private String attachments;
 
-    @Column(length = 373)
+    @Column(length = 361)
     private String nonce;
 
     private Instant created;
