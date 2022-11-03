@@ -32,10 +32,11 @@ public class MessageController {
     private final FileServiceImpl fileService;
 
 
+    // DELETE LATER
     @PostMapping
     @Transactional
     public void sendMessage(@RequestBody List<Message> messages, @RequestParam UUID iam) {
-        messageService.oldSendMessage(messages, iam);
+        messageService.sendMessage(messages);
     }
 
     @PutMapping("/title")

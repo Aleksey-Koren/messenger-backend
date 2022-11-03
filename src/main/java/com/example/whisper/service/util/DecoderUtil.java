@@ -1,10 +1,9 @@
-package com.example.whisper.service.impl;
+package com.example.whisper.service.util;
 
 import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Utility;
 import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.UtilRepository;
-import com.example.whisper.service.util.RsaKeyUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,7 +31,6 @@ import static javax.crypto.Cipher.DECRYPT_MODE;
 @Slf4j
 public class DecoderUtil {
 
-    private final CryptServiceImpl cryptService;
     private final UtilRepository utilRepository;
     private final CustomerRepository customerRepository;
 
@@ -65,7 +63,7 @@ public class DecoderUtil {
         return decryptSecretText(senderId, secretText, nonce);
     }
 
-    public String decryptSecretText(UUID senderId, String secretText, String nonce) {
+    private String decryptSecretText(UUID senderId, String secretText, String nonce) {
         Customer sender = customerRepository.findById(senderId).orElseThrow(() -> {
             log.warn("Sender with id = {} doesn't exist in database", senderId);
             return new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -79,16 +77,16 @@ public class DecoderUtil {
         return decrypt(secretText, sender.getPk(), secretKey.getUtilValue(), nonce);
     }
 
-    private String decrypt(String input, String publicKeyToVerify, String secretKeyToDecrypt, String nonce) {
+    private String decrypt(String input, String publicKeyPem, String privateKeyPem, String nonce) {
         Base64.Decoder decoder = Base64.getDecoder();
         byte[] inputBytes = decoder.decode(input);
 
-        PublicKey publicKey = RsaKeyUtil.pemToPublicKey(publicKeyToVerify);
-        PrivateKey privateKey = RsaKeyUtil.pemToPrivateKey(secretKeyToDecrypt);
+        PublicKey publicKeyToVerify = RsaKeyConverterUtil.pemToPublicKey(publicKeyPem);
+        PrivateKey privateKeyToDecrypt = RsaKeyConverterUtil.pemToPrivateKey(privateKeyPem);
 
-        verify(nonce, publicKey);
+        verify(nonce, publicKeyToVerify);
 
-        Cipher cipher = getCipherRSAForDecrypt(privateKey);
+        Cipher cipher = getCipherRSAForDecrypt(privateKeyToDecrypt);
         try {
             return new String(cipher.doFinal(inputBytes), StandardCharsets.UTF_8);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
@@ -96,14 +94,18 @@ public class DecoderUtil {
         }
     }
 
+    /**
+     * Method that verify nonce by public key.
+     *
+     * @param nonce     - hashed data
+     * @param publicKey - for verify
+     */
     private void verify(String nonce, PublicKey publicKey) {
         String[] values = nonce.split(":");
-        byte[] signature = Base64.getDecoder().decode(values[0]);
-
         Base64.Decoder decoder = Base64.getDecoder();
-        byte[] digest = decoder.decode(values[1]);
 
-//        byte[] digest = values[1].getBytes(StandardCharsets.UTF_8);
+        byte[] signature = decoder.decode(values[0]);
+        byte[] digest = decoder.decode(values[1]);
 
         try {
             Signature sign = Signature.getInstance("SHA1withRSA");

@@ -44,9 +44,7 @@ public class MessageServiceImpl implements MessageService {
                                          UUID chat,
                                          Pageable pageable) {
         return messageRepository.findAll((root, query, criteriaBuilder) -> {
-            Predicate where = criteriaBuilder.and(
-                    criteriaBuilder.equal(root.get("receiver"), receiver)
-            );
+            Predicate where = criteriaBuilder.and(criteriaBuilder.equal(root.get("receiver"), receiver));
             if (chat != null) {
                 where = criteriaBuilder.and(where, criteriaBuilder.equal(root.get("chat"), chat));
             }
@@ -66,19 +64,6 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void sendMessage(List<Message> messages) {
-        System.out.println(messages);
-        if (!MessageValidator.isValid(messages)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-
-        List<Message> outMessages = whisperMessageService.processMessages(messages);
-
-        for (Message message : outMessages) {
-            simpMessagingTemplate.convertAndSendToUser(message.getReceiver().toString(), "/private", message);
-        }
-    }
-
-    public void oldSendMessage(List<Message> messages, UUID iam) {
         if (!MessageValidator.isValid(messages)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }

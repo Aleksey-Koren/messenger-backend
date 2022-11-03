@@ -2,7 +2,7 @@ package com.example.whisper.service.aop;
 
 import com.example.whisper.entity.Administrator;
 import com.example.whisper.repository.AdministratorRepository;
-import com.example.whisper.service.impl.DecoderUtil;
+import com.example.whisper.service.util.DecoderUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

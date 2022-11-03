@@ -4,7 +4,7 @@ import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Utility;
 import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.UtilRepository;
-import com.example.whisper.service.util.RsaKeyUtil;
+import com.example.whisper.service.util.RsaKeyConverterUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,8 +36,8 @@ public class InitService {
         keyPairGenerator.initialize(keySize);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-        String publicKeyPem = RsaKeyUtil.publicKeyToPem(keyPair.getPublic());
-        String privateKeyPem = RsaKeyUtil.privateKeyToPem(keyPair.getPrivate());
+        String publicKeyPem = RsaKeyConverterUtil.publicKeyToPem(keyPair.getPublic());
+        String privateKeyPem = RsaKeyConverterUtil.privateKeyToPem(keyPair.getPrivate());
 
         Customer serverCustomer = new Customer(id, publicKeyPem);
         customerRepository.save(serverCustomer);

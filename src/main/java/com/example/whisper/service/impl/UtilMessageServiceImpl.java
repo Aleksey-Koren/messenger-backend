@@ -29,6 +29,7 @@ public class UtilMessageServiceImpl implements UtilMessageService {
         if (controlMessage.getAttachments() == null || "".equals(controlMessage.getAttachments())) {
             return messageRepository.saveAll(messages);
         } else {
+            System.out.println("ELSE SAVE ALL");
             return messageRepository.saveAll(processAttachments(messages));
         }
     }

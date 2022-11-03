@@ -2,7 +2,7 @@ package com.example.whisper.controller;
 
 import com.example.whisper.entity.Message;
 import com.example.whisper.service.impl.MessageServiceImpl;
-import com.example.whisper.service.impl.DecoderUtil;
+import com.example.whisper.service.util.DecoderUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -22,7 +22,6 @@ import java.util.UUID;
 public class MessagesWebSocketController {
 
     private final MessageServiceImpl messageService;
-    private final DecoderUtil secretMessageUtil;
 
     @MessageMapping("/chat/addUser")
     public void addUser(@Payload String uuid, SimpMessageHeaderAccessor headerAccessor) {
@@ -31,26 +30,7 @@ public class MessagesWebSocketController {
 
     @MessageMapping("/chat/send-message/{iam}")
     public void sendChatMessage(@Payload List<Message> messages, @DestinationVariable UUID iam) {
-        System.out.println("----------------SOCKET----------------------------");
-        System.out.println("iam = " + iam);
-        System.out.println(messages);
-        messageService.oldSendMessage(messages, iam);
+        messageService.sendMessage(messages);
     }
-
-    @MessageMapping("/test/")
-    public void test(@Payload List<Message> messages,
-                     @RequestHeader("test") String language) {
-
-//        headers.forEach((key, value) -> {
-//            System.out.printf("Header '%s' = %s%n", key, value);
-//        });
-//        System.out.println("ENCRYPT TOKEN = " + token);
-
-//        String decrypt = secretMessageUtil
-//                .decryptSecretText(UUID.fromString("5ce5ac54-3586-42e1-88e2-ae294f075f44"), token, nonce);
-
-//        System.out.println("ENCRYPT TOKEN = " + decrypt);
-    }
-
 
 }

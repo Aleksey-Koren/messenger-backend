@@ -1,5 +1,8 @@
 package com.example.whisper.service.util;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -14,7 +17,7 @@ import java.util.Base64;
  *
  * @author Maksim Semianko
  */
-public class RsaKeyUtil {
+public class RsaKeyConverterUtil {
 
     static private final String BEGIN_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----";
     static private final String END_PUBLIC_KEY = "-----END PUBLIC KEY-----";
@@ -56,13 +59,13 @@ public class RsaKeyUtil {
                 .replaceAll(LINE_SEPARATOR, "")
                 .replace(END_PUBLIC_KEY, "");
 
-        try {
-            return KeyFactory.getInstance("RSA").generatePublic(getKeySpecFromPem(clearPublicPem));
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+        X509EncodedKeySpec encodedKeySpec = getKeySpecFromPublicPem(clearPublicPem);
 
-        return null;
+        try {
+            return KeyFactory.getInstance("RSA").generatePublic(encodedKeySpec);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -77,29 +80,32 @@ public class RsaKeyUtil {
                 .replaceAll(LINE_SEPARATOR, "")
                 .replace(END_PRIVATE_KEY, "");
 
-        System.out.println(clearPrivatePem);
         PKCS8EncodedKeySpec encodedKeySpec = getKeySpecFromPrivatePem(clearPrivatePem);
 
         try {
             return KeyFactory.getInstance("RSA").generatePrivate(encodedKeySpec);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return null;
     }
 
     /**
-     * Method that returns EncodedKeySpec.
+     * Method that returns EncodedKeySpec for public key.
      *
      * @param pem - pem format
      * @return EncodedKeySpec
      */
-    private static X509EncodedKeySpec getKeySpecFromPem(String pem) {
+    private static X509EncodedKeySpec getKeySpecFromPublicPem(String pem) {
         byte[] encoded = Base64.getDecoder().decode(pem);
         return new X509EncodedKeySpec(encoded);
     }
 
+    /**
+     * Method that returns EncodedKeySpec for private key.
+     *
+     * @param pem - pem format
+     * @return PKCS8EncodedKeySpec
+     */
     private static PKCS8EncodedKeySpec getKeySpecFromPrivatePem(String pem) {
         byte[] encoded = Base64.getDecoder().decode(pem);
         return new PKCS8EncodedKeySpec(encoded);
@@ -107,6 +113,7 @@ public class RsaKeyUtil {
 
     /**
      * Method that transforms the row of key to pem format.
+     *
      * @param key - the row
      * @return the pem format
      */
