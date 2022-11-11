@@ -49,12 +49,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<Customer> getDistinctCustomersWhichMembersOfChatsByCustomerId(UUID customerId) {
-        Customer customer = findById(customerId);
-        return customerRepository.findDistinctWhereMembersOfChatsOfCustomer(customer);
-    }
-
-    @Override
     public Customer register(Customer customer) {
         customer.setId(UUID.randomUUID());
         return customerRepository.save(customer);

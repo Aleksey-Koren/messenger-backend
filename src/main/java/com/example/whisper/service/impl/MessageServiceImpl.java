@@ -6,6 +6,7 @@ import com.example.whisper.entity.Message;
 import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.ChatService;
 import com.example.whisper.service.MessageService;
+import com.example.whisper.service.validator.CustomerValidator;
 import com.example.whisper.service.validator.MessageValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -152,49 +153,14 @@ public class MessageServiceImpl implements MessageService {
     }
 
     public List<Message> updateUserTitle(List<Message> messages) {
-        System.out.println("updateUserTitle");
-        System.out.println(messages);
-        if (!isValidUpdateTitle(messages)) {
+        if (!CustomerValidator.isValidUpdateTitle(messages)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+
         Message commonData = messages.get(0);
         messageRepository.deleteAllBySenderAndType(commonData.getSender(), Message.MessageType.iam);
         setInstantData(messages);
         return messageRepository.saveAll(messages);
-    }
-
-    private boolean isValidUpdateTitle(List<Message> messages) {
-        if (isEmpty(messages)) {
-            return false;
-        }
-        return areFieldsCorrectUpdateTitle(messages);
-    }
-
-    private boolean isEmpty(List<Message> messages) {
-        return messages == null || messages.isEmpty();
-    }
-
-    private boolean areFieldsCorrectUpdateTitle(List<Message> messages) {
-        Message oneFromAll = messages.get(0);
-        for (Message message : messages) {
-            if (isEmpty(message.getSender()) ||
-                    isEmpty(message.getReceiver()) ||
-                    message.getType() == null ||
-                    isEmpty(message.getData()) ||
-                    !message.getSender().equals(oneFromAll.getSender())
-            ) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean isEmpty(UUID uuid) {
-        return uuid == null;
-    }
-
-    private boolean isEmpty(String str) {
-        return str == null || "".equals(str);
     }
 
     private void setInstantData(List<Message> messages) {

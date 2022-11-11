@@ -11,8 +11,6 @@ public interface CustomerService {
 
     List<Customer> findAllByIds(List<UUID> ids);
 
-    List<Customer> getDistinctCustomersWhichMembersOfChatsByCustomerId(UUID customerId);
-
     Customer register(Customer customer);
 
     Void delete(Customer customer);

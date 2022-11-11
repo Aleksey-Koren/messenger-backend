@@ -31,14 +31,6 @@ public class MessageController {
     private final MessageServiceImpl messageService;
     private final FileServiceImpl fileService;
 
-
-    // DELETE LATER
-    @PostMapping
-    @Transactional
-    public void sendMessage(@RequestBody List<Message> messages, @RequestParam UUID iam) {
-        messageService.sendMessage(messages);
-    }
-
     @PutMapping("/title")
     @Transactional
     public List<Message> changeUserTitle(@RequestBody List<Message> messages, @RequestParam UUID iam) {

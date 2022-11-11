@@ -12,8 +12,6 @@ import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,6 +74,7 @@ public class ChatServiceImpl implements ChatService {
         messageRepository.deleteAllBySenderAndChatAndType(customerId, chatId, Message.MessageType.iam);
         messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.hello);
         administratorRepository.deleteByUserIdAndChatId(customerId, chatId);
+
         chatRepository.save(chat);
     }
 
@@ -85,14 +84,14 @@ public class ChatServiceImpl implements ChatService {
         Chat chat = findById(chatId);
         Customer customer = findCustomerById(customerId);
 
-//        String decryptSecretText = decoderUtil.decryptToken(token);
-//        ServerMessageType serverMessageType = serverMessageService.getServerMessageType(decryptSecretText);
+        if (withDeleteMessages) {
+            messageRepository.deleteAllByReceiverAndSenderAndChat(customerId, customerId, chatId);
+        } else {
+            messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.iam);
+            messageRepository.deleteAllBySenderAndChatAndType(customerId, chatId, Message.MessageType.iam);
+            messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.hello);
+        }
 
-//        switch (serverMessageType) {
-//            case LEAVE_CHAT -> {
-        messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.iam);
-        messageRepository.deleteAllBySenderAndChatAndType(customerId, chatId, Message.MessageType.iam);
-        messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.hello);
         chat.getMembers().remove(customer);
         chatRepository.save(chat);
 
@@ -100,19 +99,6 @@ public class ChatServiceImpl implements ChatService {
             administratorRepository.deleteByUserIdAndChatId(customerId, chatId);
             assignRolesToOtherUsersOfChat(chat);
         }
-//            }
-//            case LEAVE_CHAT_WITH_DELETE_OWN_MESSAGES -> {
-//                messageRepository.deleteAllByReceiverAndSenderAndChat(customerId, customerId, chatId);
-//            }
-//            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid server message type!");
-//        }
-
-    }
-
-    @Override
-    public Page<Chat> findAllWhereCustomerIdIsMember(UUID id, Pageable pageable) {
-        Customer customer = findCustomerById(id);
-        return chatRepository.findAllWhereCustomerIsMember(customer, pageable);
     }
 
     private Customer findCustomerById(UUID uuid) {
@@ -122,7 +108,6 @@ public class ChatServiceImpl implements ChatService {
     }
 
     private void assignRolesToOtherUsersOfChat(Chat chat) {
-
         List<Administrator> administratorList = administratorRepository.findAllByChatId(chat.getId());
 
         List<Administrator> listWithUserTypeAdmin = administratorList

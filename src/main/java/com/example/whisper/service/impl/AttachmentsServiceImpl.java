@@ -28,6 +28,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         String pathToFile = pathToFolder + separator + attachment;
         InputStream inputStream;
         long contentLength;
+
         try {
             Path path = Paths.get(pathToFile);
             inputStream = Files.newInputStream(Paths.get(pathToFile));

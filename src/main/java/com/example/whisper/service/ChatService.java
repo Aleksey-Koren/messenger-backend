@@ -10,8 +10,6 @@ public interface ChatService {
 
     Chat findById(UUID uuid);
 
-    Page<Chat> findAllWhereCustomerIdIsMember(UUID id, Pageable pageable);
-
     Chat create(Chat chat);
 
     Chat addCustomerToChat(UUID customerId, UUID chatId);

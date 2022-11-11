@@ -63,7 +63,7 @@ public class DecoderUtil {
         return decryptSecretText(senderId, secretText, nonce);
     }
 
-    private String decryptSecretText(UUID senderId, String secretText, String nonce) {
+    public String decryptSecretText(UUID senderId, String secretText, String nonce) {
         Customer sender = customerRepository.findById(senderId).orElseThrow(() -> {
             log.warn("Sender with id = {} doesn't exist in database", senderId);
             return new ResponseStatusException(HttpStatus.BAD_REQUEST);

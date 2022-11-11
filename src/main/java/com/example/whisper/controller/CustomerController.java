@@ -39,13 +39,6 @@ public class CustomerController {
         return customerService.findAllByIds(ids);
     }
 
-    @GetMapping("/chat-members/distinct/{customerId}")
-    public ResponseEntity<List<Customer>> findAllDistinctCustomersWhichMembersOfChatsByCustomerId(
-            @PathVariable UUID customerId) {
-        return new ResponseEntity<>(
-                customerService.getDistinctCustomersWhichMembersOfChatsByCustomerId(customerId), HttpStatus.OK);
-    }
-
     @GetMapping("{id}")
     public ResponseEntity<Customer> getCustomer(@PathVariable("id") UUID id) {
         return new ResponseEntity<>(customerService.findById(id), HttpStatus.OK);
