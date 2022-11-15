@@ -39,6 +39,9 @@ public class CustomerServiceImpl implements CustomerService {
     public Customer findById(UUID id) {
         return customerRepository.findById(id).orElseThrow(() -> {
             log.warn("No customer with id = {} in database", id);
+            //@TODO INFO it could be bad, in case if that method will be called
+            //from another service. In that case you need to intercep exception
+            //instead of Optional.isPresent() check
             throw new ResourseNotFoundException("Customer not found by id!");
         });
     }

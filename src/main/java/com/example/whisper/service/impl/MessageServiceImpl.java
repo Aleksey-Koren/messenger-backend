@@ -113,6 +113,8 @@ public class MessageServiceImpl implements MessageService {
         }
         if (controlMessage.getSender().equals(controlMessage.getReceiver())) {
             Chat chat = new Chat();
+            //@TODO ERROR chat ID passed from outside without any validations
+            //allow any user erase participants list
             chat.setId(controlMessage.getChat());
             chat.setCreatorId(controlMessage.getSender());
             chatService.create(chat);
@@ -141,6 +143,7 @@ public class MessageServiceImpl implements MessageService {
 
     public List<Message> findChats(UUID receiver) {
         List<Message> chats = messageRepository.findChats(receiver, Message.MessageType.hello);
+        //@TODO WARN unused variable
         List<UUID> chatsIds = chats.stream().map(Message::getChat).toList();
 
 //        Map<UUID, Instant> lastMessages = messageRepository.findLastMessageCreatedInChats(chatsIds)
@@ -158,6 +161,7 @@ public class MessageServiceImpl implements MessageService {
         }
 
         Message commonData = messages.get(0);
+        //@TODO ERROR is it allow to anybody delete any title?
         messageRepository.deleteAllBySenderAndType(commonData.getSender(), Message.MessageType.iam);
         setInstantData(messages);
         return messageRepository.saveAll(messages);
@@ -185,6 +189,7 @@ public class MessageServiceImpl implements MessageService {
         return messageRepository.findAll((root, query, criteriaBuilder) ->
                 criteriaBuilder.and(
                         criteriaBuilder.lessThanOrEqualTo(
+                                //@TODO WARN use @FieldNameConstants
                                 root.get("created"), Instant.now().minus(messageProperties.getLifespan(), ChronoUnit.MILLIS)),
                         criteriaBuilder.equal(root.get("type"), Message.MessageType.whisper)
                 ));

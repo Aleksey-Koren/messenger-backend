@@ -20,6 +20,7 @@ public interface AdministratorRepository extends JpaRepository<Administrator, UU
 
     Optional<Administrator> findByUserIdAndChatIdAndUserType(UUID userId, UUID chatId, Administrator.UserType userType);
 
+    //@TODO WARN check hibernate queries, should be same as "deleteAllByUserIdAndChatId"
     @Transactional
     void deleteByUserIdAndChatId(UUID userId, UUID chatId);
 

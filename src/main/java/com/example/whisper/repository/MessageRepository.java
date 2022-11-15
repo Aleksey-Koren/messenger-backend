@@ -12,6 +12,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+//@TODO WARN delete unused methods
 public interface MessageRepository extends JpaRepository<Message, UUID>, JpaSpecificationExecutor<Message> {
 
     @Query("select message from Message message where (message.receiver = :receiver and message.type = :messageType)")

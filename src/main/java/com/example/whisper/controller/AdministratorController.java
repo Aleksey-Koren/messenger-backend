@@ -30,11 +30,14 @@ public class AdministratorController {
     private final AdministratorService administratorService;
 
     @GetMapping("/chats/{chatId}")
+    //@TODO INFO delete response entity
     public ResponseEntity<List<Administrator>> findAllByChatId(@PathVariable UUID chatId) {
         return new ResponseEntity<>(administratorService.findAllByChatId(chatId), HttpStatus.OK);
     }
 
     @PostMapping("/")
+    //@TODO WARN no consistency between controllers denyRole and assignRole. Controller
+    //signature should be same - /customers/{customerId}/chats/{chatId}
     @PreAuthorize("@securityService.hasRoleInChat(#token, #roleDto.chatId, 'ADMINISTRATOR')")
     public ResponseEntity<Administrator> assignRole(@RequestHeader("Token") String token,
                                                     @RequestBody RequestRoleDto roleDto) {

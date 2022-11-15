@@ -64,6 +64,7 @@ public class ChatServiceImpl implements ChatService {
         return chatRepository.save(chat);
     }
 
+    //@TODO WARN create private method which could be used with leaveChat
     @Override
     @Transactional
     public void removeCustomerFromChat(UUID customerId, UUID chatId) {

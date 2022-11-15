@@ -26,6 +26,7 @@ import java.util.UUID;
 @ToString
 public class Message {
 
+    //@TODO INFO all should be in uppercase
     public enum MessageType {
         hello, //0
         iam, //1
@@ -56,11 +57,12 @@ public class Message {
     @NotNull
     private MessageType type;
 
+    //@TODO WARN - what is it number
     @Column(length = 344)
     private String data;
 
     private String attachments;
-
+    //@TODO WARN - what is it number
     @Column(length = 361)
     private String nonce;
 

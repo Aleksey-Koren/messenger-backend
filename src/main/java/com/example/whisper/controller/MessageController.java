@@ -40,6 +40,7 @@ public class MessageController {
                 .collect(Collectors.toList());
     }
 
+    //@TODO replace all incoming parameters into a filter object
     @GetMapping()
     public ResponseEntity<Page<Message>> getMessages(
             @RequestParam("receiver") UUID receiver,

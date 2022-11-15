@@ -90,6 +90,7 @@ public class DecoderUtil {
         try {
             return new String(cipher.doFinal(inputBytes), StandardCharsets.UTF_8);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
+            //@TODO WARN I would like to say BAD_REQUEST. May be INTERNAL_SERVER_ERROR
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

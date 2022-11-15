@@ -1,7 +1,7 @@
 package com.example.whisper.entity;
 
 import lombok.Getter;
-
+//@TODO WARN wrong package, should be com.example.whisper.dto
 @Getter
 public enum ServerMessageType {
 

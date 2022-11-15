@@ -29,12 +29,14 @@ public class UtilMessageServiceImpl implements UtilMessageService {
         if (controlMessage.getAttachments() == null || "".equals(controlMessage.getAttachments())) {
             return messageRepository.saveAll(messages);
         } else {
+            //@TODO WARN delete SOUT
             System.out.println("ELSE SAVE ALL");
             return messageRepository.saveAll(processAttachments(messages));
         }
     }
 
     private void setInstantData(List<Message> messages) {
+        //@TODO WARN duplicate code fragment, move into utility method
         Instant now = Instant.now();
         if (messages.get(0).getChat() == null) {
             UUID chatId = UUID.randomUUID();

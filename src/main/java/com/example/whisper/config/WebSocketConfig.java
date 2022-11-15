@@ -11,6 +11,7 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 
 @Configuration
 @EnableWebSocketMessageBroker
+//@TODO WARN delete deprecated abstract class
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer implements WebSocketMessageBrokerConfigurer {
 
     @Value("${web.socket.message-size-limit}")

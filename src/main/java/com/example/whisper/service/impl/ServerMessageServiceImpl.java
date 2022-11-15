@@ -67,6 +67,7 @@ public class ServerMessageServiceImpl implements ServerMessageService {
     }
 
     // Now nothing here, because checking token with @PreAuthorize
+    //@TODO WARN if nothing here, may be delete that method?
     @Transactional
     public void processServerMessage(Message decrypted) {
         String data = decrypted.getData();

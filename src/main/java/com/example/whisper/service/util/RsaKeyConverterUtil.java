@@ -19,6 +19,7 @@ import java.util.Base64;
  */
 public class RsaKeyConverterUtil {
 
+    //@TODO INFO I think more standard way how to handle that operations
     static private final String BEGIN_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----";
     static private final String END_PUBLIC_KEY = "-----END PUBLIC KEY-----";
     static private final String BEGIN_PRIVATE_KEY = "-----BEGIN RSA PRIVATE KEY-----";

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatController {
 
+    //@TODO INFO service-repository mess. Should be only services
     private final ChatService chatService;
     private final MessageServiceImpl messageService;
     private final MessageRepository messageRepository;
@@ -37,9 +38,13 @@ public class ChatController {
         return messageService.findChats(receiver);
     }
 
+    //@TODO INFO no consistency between controllers, shohuld be {chatId}/customers
+    //with filter variable message type
+    //@TODO INFO should be in CustomersController
     @GetMapping("{id}/participants")
     public List<Customer> getParticipants(@PathVariable("id") UUID chatId) {
         List<Message> messages = messageRepository.findAllByChatAndType(chatId, Message.MessageType.hello);
+        //@TODO WARN think may sense to replace with a set, or add "distinct" method call
         List<UUID> participants = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
         if (participants.isEmpty()) {
             return new ArrayList<>();
