@@ -1,11 +1,14 @@
 package com.example.whisper.service.impl;
 
-import com.example.whisper.app_properties.MessageProperties;
+import com.example.whisper.app.properties.MessageProperties;
 import com.example.whisper.entity.Chat;
+import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Message;
+import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.ChatService;
 import com.example.whisper.service.MessageService;
+import com.example.whisper.service.util.MessageHelperUtil;
 import com.example.whisper.service.validator.CustomerValidator;
 import com.example.whisper.service.validator.MessageValidator;
 import lombok.RequiredArgsConstructor;
@@ -30,12 +33,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
-    private final MessageRepository messageRepository;
-    private final UtilMessageServiceImpl whisperMessageService;
-    private final MessageProperties messageProperties;
-    private final SimpMessagingTemplate simpMessagingTemplate;
-    private final ServerMessageServiceImpl serverMessageService;
     private final ChatService chatService;
+    private final UtilMessageServiceImpl whisperMessageService;
+    private final MessageRepository messageRepository;
+    private final CustomerRepository customerRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final MessageProperties messageProperties;
 
     @Override
     public Page<Message> findAllByParams(UUID receiver,
@@ -45,20 +48,20 @@ public class MessageServiceImpl implements MessageService {
                                          UUID chat,
                                          Pageable pageable) {
         return messageRepository.findAll((root, query, criteriaBuilder) -> {
-            Predicate where = criteriaBuilder.and(criteriaBuilder.equal(root.get("receiver"), receiver));
+            Predicate where = criteriaBuilder.and(criteriaBuilder.equal(root.get(Message.Fields.receiver), receiver));
             if (chat != null) {
-                where = criteriaBuilder.and(where, criteriaBuilder.equal(root.get("chat"), chat));
+                where = criteriaBuilder.and(where, criteriaBuilder.equal(root.get(Message.Fields.chat), chat));
             }
             if (type != null) {
-                where = criteriaBuilder.and(where, criteriaBuilder.equal(root.get("type"), type));
+                where = criteriaBuilder.and(where, criteriaBuilder.equal(root.get(Message.Fields.type), type));
             }
             if (created != null) {
-                where = criteriaBuilder.and(where, criteriaBuilder.greaterThanOrEqualTo(root.get("created"), created));
+                where = criteriaBuilder.and(where, criteriaBuilder.greaterThanOrEqualTo(root.get(Message.Fields.created), created));
             }
             if (before != null) {
-                where = criteriaBuilder.and(where, criteriaBuilder.lessThan(root.get("created"), before));
+                where = criteriaBuilder.and(where, criteriaBuilder.lessThan(root.get(Message.Fields.created), before));
             }
-            query.orderBy(criteriaBuilder.desc(root.get("created")));
+            query.orderBy(criteriaBuilder.desc(root.get(Message.Fields.created)));
             return where;
         }, pageable);
     }
@@ -69,19 +72,16 @@ public class MessageServiceImpl implements MessageService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
-        setInstantData(messages);
+        MessageHelperUtil.setInstantData(messages);
 
         Message controlMessage = messages.get(0);
-        List<Message> out = new ArrayList<>();
+        List<Message> out;
+
         switch (controlMessage.getType()) {
-            case whisper -> out = whisperMessageService.processMessages(messages);
-            case who -> out = handleWhoMessages(messages, controlMessage);
-            case hello -> out = handleHelloMessages(messages, controlMessage);
-            case iam -> out = handleAimMessages(messages, controlMessage);
-            case server -> {
-                Message decrypted = serverMessageService.decryptServerMessage(messages);
-                serverMessageService.processServerMessage(decrypted);
-            }
+            case WHISPER -> out = whisperMessageService.processMessages(messages);
+            case WHO -> out = handleWhoMessages(messages, controlMessage);
+            case HELLO -> out = handleHelloMessages(messages, controlMessage);
+            case IAM -> out = handleAimMessages(messages, controlMessage);
             case LEAVE_CHAT -> out = messages;
             default -> {
                 log.warn("Unknown type of message");
@@ -109,14 +109,16 @@ public class MessageServiceImpl implements MessageService {
     private List<Message> handleHelloMessages(List<Message> messages, Message controlMessage) {
         List<UUID> receivers = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
         if (!receivers.isEmpty()) {
-            messageRepository.deleteHelloMessages(controlMessage.getChat(), Message.MessageType.hello, receivers);
+            messageRepository.deleteHelloMessages(controlMessage.getChat(), Message.MessageType.HELLO, receivers);
         }
         if (controlMessage.getSender().equals(controlMessage.getReceiver())) {
             Chat chat = new Chat();
-            //@TODO ERROR chat ID passed from outside without any validations
-            //allow any user erase participants list
-            chat.setId(controlMessage.getChat());
+            UUID chatId = UUID.randomUUID();
+
+            chat.setId(chatId);
             chat.setCreatorId(controlMessage.getSender());
+
+            controlMessage.setChat(chatId);
             chatService.create(chat);
         } else {
             chatService.addCustomerToChat(controlMessage.getReceiver(), controlMessage.getChat());
@@ -131,28 +133,19 @@ public class MessageServiceImpl implements MessageService {
                 controlMessage.getChat(),
                 receivers,
                 controlMessage.getSender(),
-                Message.MessageType.who);
+                Message.MessageType.WHO);
 
         List<Message> messageList = messageRepository.findByChatAndSenderAndReceiverAndType(
                 controlMessage.getChat(),
                 controlMessage.getSender(),
-                controlMessage.getReceiver(), Message.MessageType.iam);
+                controlMessage.getReceiver(), Message.MessageType.IAM);
 
         return messageList.size() == 0 ? messageRepository.saveAll(messages) : messages;
     }
 
-    public List<Message> findChats(UUID receiver) {
-        List<Message> chats = messageRepository.findChats(receiver, Message.MessageType.hello);
-        //@TODO WARN unused variable
-        List<UUID> chatsIds = chats.stream().map(Message::getChat).toList();
-
-//        Map<UUID, Instant> lastMessages = messageRepository.findLastMessageCreatedInChats(chatsIds)
-//                .stream()
-//                .collect(Collectors.toMap(LastMessageCreated::getChat, LastMessageCreated::getCreated));
-//
-//        chats.forEach(chat -> chat.setCreated(lastMessages.get(chat.getChat())));
-
-        return chats;
+    @Override
+    public List<Message> getChatsByReceiverId(UUID receiver) {
+        return messageRepository.findChats(receiver, Message.MessageType.HELLO);
     }
 
     public List<Message> updateUserTitle(List<Message> messages) {
@@ -161,27 +154,9 @@ public class MessageServiceImpl implements MessageService {
         }
 
         Message commonData = messages.get(0);
-        //@TODO ERROR is it allow to anybody delete any title?
-        messageRepository.deleteAllBySenderAndType(commonData.getSender(), Message.MessageType.iam);
-        setInstantData(messages);
+        messageRepository.deleteAllBySenderAndType(commonData.getSender(), Message.MessageType.IAM);
+        MessageHelperUtil.setInstantData(messages);
         return messageRepository.saveAll(messages);
-    }
-
-    private void setInstantData(List<Message> messages) {
-        Instant now = Instant.now();
-        if (messages.get(0).getChat() == null) {
-            UUID chatId = UUID.randomUUID();
-            for (Message message : messages) {
-                message.setId(UUID.randomUUID());
-                message.setCreated(now);
-                message.setChat(chatId);
-            }
-        } else {
-            for (Message message : messages) {
-                message.setId(UUID.randomUUID());
-                message.setCreated(now);
-            }
-        }
     }
 
     @Override
@@ -189,10 +164,21 @@ public class MessageServiceImpl implements MessageService {
         return messageRepository.findAll((root, query, criteriaBuilder) ->
                 criteriaBuilder.and(
                         criteriaBuilder.lessThanOrEqualTo(
-                                //@TODO WARN use @FieldNameConstants
-                                root.get("created"), Instant.now().minus(messageProperties.getLifespan(), ChronoUnit.MILLIS)),
-                        criteriaBuilder.equal(root.get("type"), Message.MessageType.whisper)
+                                root.get(Message.Fields.created), Instant.now().minus(messageProperties.getLifespan(),
+                                        ChronoUnit.MILLIS)),
+                        criteriaBuilder.equal(root.get(Message.Fields.type), Message.MessageType.WHISPER)
                 ));
+    }
+
+    @Override
+    public List<Customer> getParticipantsByCharId(UUID chatId) {
+        List<Message> messages = messageRepository.findAllByChatAndType(chatId, Message.MessageType.HELLO);
+        List<UUID> participants = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
+        if (participants.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return customerRepository.findAllById(participants);
+        }
     }
 
     @Override

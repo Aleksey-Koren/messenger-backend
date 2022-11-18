@@ -2,10 +2,8 @@ package com.example.whisper.controller;
 
 import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Message;
-import com.example.whisper.repository.CustomerRepository;
-import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.ChatService;
-import com.example.whisper.service.impl.MessageServiceImpl;
+import com.example.whisper.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,40 +15,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("chats")
 @RequiredArgsConstructor
 public class ChatController {
 
-    //@TODO INFO service-repository mess. Should be only services
     private final ChatService chatService;
-    private final MessageServiceImpl messageService;
-    private final MessageRepository messageRepository;
-    private final CustomerRepository customerRepository;
+    private final MessageService messageService;
 
     @GetMapping()
     public List<Message> getChats(@RequestParam("receiver") UUID receiver) {
-        return messageService.findChats(receiver);
+        return messageService.getChatsByReceiverId(receiver);
     }
 
-    //@TODO INFO no consistency between controllers, shohuld be {chatId}/customers
-    //with filter variable message type
-    //@TODO INFO should be in CustomersController
-    @GetMapping("{id}/participants")
+    @GetMapping("{id}/customers")
     public List<Customer> getParticipants(@PathVariable("id") UUID chatId) {
-        List<Message> messages = messageRepository.findAllByChatAndType(chatId, Message.MessageType.hello);
-        //@TODO WARN think may sense to replace with a set, or add "distinct" method call
-        List<UUID> participants = messages.stream().map(Message::getReceiver).collect(Collectors.toList());
-        if (participants.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return customerRepository.findAllById(participants);
-        }
+        return messageService.getParticipantsByCharId(chatId);
     }
 
     @DeleteMapping("/{chatId}/customers/{customerId}")

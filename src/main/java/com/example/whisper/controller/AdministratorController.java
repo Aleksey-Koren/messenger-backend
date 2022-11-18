@@ -1,8 +1,8 @@
 package com.example.whisper.controller;
 
 import com.example.whisper.dto.RequestRoleDto;
-import com.example.whisper.entity.Administrator;
-import com.example.whisper.service.AdministratorService;
+import com.example.whisper.entity.UserRole;
+import com.example.whisper.service.UserRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,21 +27,21 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AdministratorController {
 
-    private final AdministratorService administratorService;
+    private final UserRoleService administratorService;
 
     @GetMapping("/chats/{chatId}")
-    //@TODO INFO delete response entity
-    public ResponseEntity<List<Administrator>> findAllByChatId(@PathVariable UUID chatId) {
-        return new ResponseEntity<>(administratorService.findAllByChatId(chatId), HttpStatus.OK);
+    public List<UserRole> findAllByChatId(@PathVariable UUID chatId) {
+        return administratorService.findAllByChatId(chatId);
     }
 
-    @PostMapping("/")
-    //@TODO WARN no consistency between controllers denyRole and assignRole. Controller
-    //signature should be same - /customers/{customerId}/chats/{chatId}
-    @PreAuthorize("@securityService.hasRoleInChat(#token, #roleDto.chatId, 'ADMINISTRATOR')")
-    public ResponseEntity<Administrator> assignRole(@RequestHeader("Token") String token,
-                                                    @RequestBody RequestRoleDto roleDto) {
-        return new ResponseEntity<>(administratorService.createRoleByCustomerIdAndChatId(roleDto), HttpStatus.CREATED);
+    @PostMapping("/customers/{customerId}/chats/{chatId}")
+    @PreAuthorize("@securityService.hasRoleInChat(#token, #chatId, 'ADMINISTRATOR')")
+    public ResponseEntity<UserRole> assignRole(@RequestHeader("Token") String token,
+                                               @PathVariable UUID customerId,
+                                               @PathVariable UUID chatId,
+                                               @RequestBody RequestRoleDto request) {
+        return new ResponseEntity<>(
+                administratorService.createRoleByCustomerIdAndChatId(customerId, chatId, request), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/customers/{customerId}/chats/{chatId}")

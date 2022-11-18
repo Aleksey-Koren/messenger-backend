@@ -24,8 +24,7 @@ import java.util.UUID;
 @Builder
 @ToString
 @EqualsAndHashCode
-//@TODO INFO it should be UserRole or something. Not Administrator
-public class Administrator {
+public class UserRole {
 
     public enum UserType {
         ADMINISTRATOR,

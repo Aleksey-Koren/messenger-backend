@@ -9,11 +9,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,15 +33,17 @@ public class MessageController {
     private final FileServiceImpl fileService;
 
     @PutMapping("/title")
+    @PreAuthorize("@securityService.isOwner(#token, #iam)")
     @Transactional
-    public List<Message> changeUserTitle(@RequestBody List<Message> messages, @RequestParam UUID iam) {
+    public List<Message> changeUserTitle(@RequestHeader("Token") String token,
+                                         @RequestBody List<Message> messages,
+                                         @RequestParam UUID iam) {
         return messageService.updateUserTitle(messages)
                 .stream()
                 .filter(message -> message.getSender().equals(iam))
                 .collect(Collectors.toList());
     }
 
-    //@TODO replace all incoming parameters into a filter object
     @GetMapping()
     public ResponseEntity<Page<Message>> getMessages(
             @RequestParam("receiver") UUID receiver,

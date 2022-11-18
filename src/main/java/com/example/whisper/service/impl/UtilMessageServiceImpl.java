@@ -3,15 +3,14 @@ package com.example.whisper.service.impl;
 import com.example.whisper.entity.Message;
 import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.UtilMessageService;
+import com.example.whisper.service.util.MessageHelperUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,33 +22,13 @@ public class UtilMessageServiceImpl implements UtilMessageService {
     private final FileServiceImpl fileService;
 
     public List<Message> processMessages(List<Message> messages) {
-        setInstantData(messages);
+        MessageHelperUtil.setInstantData(messages);
 
         Message controlMessage = messages.get(0);
         if (controlMessage.getAttachments() == null || "".equals(controlMessage.getAttachments())) {
             return messageRepository.saveAll(messages);
         } else {
-            //@TODO WARN delete SOUT
-            System.out.println("ELSE SAVE ALL");
             return messageRepository.saveAll(processAttachments(messages));
-        }
-    }
-
-    private void setInstantData(List<Message> messages) {
-        //@TODO WARN duplicate code fragment, move into utility method
-        Instant now = Instant.now();
-        if (messages.get(0).getChat() == null) {
-            UUID chatId = UUID.randomUUID();
-            for (Message message : messages) {
-                message.setId(UUID.randomUUID());
-                message.setCreated(now);
-                message.setChat(chatId);
-            }
-        } else {
-            for (Message message : messages) {
-                message.setId(UUID.randomUUID());
-                message.setCreated(now);
-            }
         }
     }
 
@@ -59,9 +38,11 @@ public class UtilMessageServiceImpl implements UtilMessageService {
 
     private Message processMessage(Message message) {
         String folderPath = fileService.retrieveFolderPath(message.getId());
-        fileService.createDirectories(Paths.get(folderPath));
         String[] files = message.getAttachments().split(";");
+
+        fileService.createDirectories(Paths.get(folderPath));
         fileService.saveFiles(folderPath, files);
+
         message.setAttachments(retrieveAttachmentsString(files));
         return message;
     }

@@ -1,14 +1,14 @@
 package com.example.whisper.service.impl;
 
 import com.example.whisper.dto.RequestRoleDto;
-import com.example.whisper.entity.Administrator;
 import com.example.whisper.entity.Chat;
 import com.example.whisper.entity.Customer;
+import com.example.whisper.entity.UserRole;
 import com.example.whisper.exceptions.ResourseNotFoundException;
-import com.example.whisper.repository.AdministratorRepository;
 import com.example.whisper.repository.ChatRepository;
 import com.example.whisper.repository.CustomerRepository;
-import com.example.whisper.service.AdministratorService;
+import com.example.whisper.repository.UserRoleRepository;
+import com.example.whisper.service.UserRoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,41 +23,40 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AdministratorServiceImpl implements AdministratorService {
+public class UserRoleServiceImpl implements UserRoleService {
 
-    private final AdministratorRepository administratorRepository;
+    private final UserRoleRepository administratorRepository;
     private final ChatRepository chatRepository;
     private final CustomerRepository customerRepository;
 
     @Override
-    public List<Administrator> findAllByChatId(UUID chatId) {
+    public List<UserRole> findAllByChatId(UUID chatId) {
         return administratorRepository.findAllByChatId(chatId);
     }
 
     @Override
     @Transactional
-    public Administrator createRoleByCustomerIdAndChatId(RequestRoleDto roleDto) {
-        UUID customerId = roleDto.getCustomerId();
-        UUID chatId = roleDto.getChatId();
-        Administrator.UserType role = Administrator.UserType.valueOf(roleDto.getRole());
+    public UserRole createRoleByCustomerIdAndChatId(UUID customerId, UUID chatId, RequestRoleDto roleDto) {
+        UserRole.UserType role = UserRole.UserType.valueOf(roleDto.getRole());
 
         Customer customer = getCustomerById(customerId);
         Chat chat = getChatById(chatId);
         checkMemberOfChat(chat, customer);
         checkCustomerIfRoleIsAlreadyExists(customerId, chatId, role);
 
-        Administrator administrator = new Administrator();
-        administrator.setId(UUID.randomUUID());
-        administrator.setUserId(customerId);
-        administrator.setChatId(chatId);
-        administrator.setUserType(role);
+        UserRole userRole = UserRole.builder()
+                .id(UUID.randomUUID())
+                .userId(customerId)
+                .chatId(chatId)
+                .userType(role)
+                .build();
 
-        return administratorRepository.save(administrator);
+        return administratorRepository.save(userRole);
     }
 
     @Override
     public void deleteRoleByCustomerIdAndChatId(UUID customerId, UUID chatId) {
-        administratorRepository.deleteByUserIdAndChatId(customerId, chatId);
+        administratorRepository.deleteAllByUserIdAndChatId(customerId, chatId);
     }
 
     private Customer getCustomerById(UUID uuid) {
@@ -78,8 +77,8 @@ public class AdministratorServiceImpl implements AdministratorService {
         }
     }
 
-    private void checkCustomerIfRoleIsAlreadyExists(UUID customerId, UUID chatId, Administrator.UserType role) {
-        Optional<Administrator> optionalAdministrator =
+    private void checkCustomerIfRoleIsAlreadyExists(UUID customerId, UUID chatId, UserRole.UserType role) {
+        Optional<UserRole> optionalAdministrator =
                 administratorRepository.findByUserIdAndChatIdAndUserType(customerId, chatId, role);
         if (optionalAdministrator.isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer already has this role in chat!");

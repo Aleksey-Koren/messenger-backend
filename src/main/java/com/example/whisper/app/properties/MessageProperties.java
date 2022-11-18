@@ -1,5 +1,5 @@
-package com.example.whisper.app_properties;
-//@TODO INFO package name "app_properties" not conform java standard, should be "app.properties"
+package com.example.whisper.app.properties;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;

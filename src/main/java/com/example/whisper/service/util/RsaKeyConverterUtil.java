@@ -19,7 +19,6 @@ import java.util.Base64;
  */
 public class RsaKeyConverterUtil {
 
-    //@TODO INFO I think more standard way how to handle that operations
     static private final String BEGIN_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----";
     static private final String END_PUBLIC_KEY = "-----END PUBLIC KEY-----";
     static private final String BEGIN_PRIVATE_KEY = "-----BEGIN RSA PRIVATE KEY-----";
@@ -27,7 +26,7 @@ public class RsaKeyConverterUtil {
     static private final String LINE_SEPARATOR = System.lineSeparator();
 
     /**
-     * Method that coverts public key to pem format.
+     * Method that converts public key to pem format.
      *
      * @param publicKey - key for convert
      * @return pem format of public key
@@ -38,7 +37,7 @@ public class RsaKeyConverterUtil {
     }
 
     /**
-     * Method that coverts private key to pem format.
+     * Method that converts private key to pem format.
      *
      * @param privateKey - key for convert
      * @return pem format of private key

@@ -1,14 +1,14 @@
 package com.example.whisper.service.impl;
 
-import com.example.whisper.entity.Administrator;
 import com.example.whisper.entity.Chat;
 import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Message;
+import com.example.whisper.entity.UserRole;
 import com.example.whisper.exceptions.ResourseNotFoundException;
-import com.example.whisper.repository.AdministratorRepository;
 import com.example.whisper.repository.ChatRepository;
 import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.MessageRepository;
+import com.example.whisper.repository.UserRoleRepository;
 import com.example.whisper.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ public class ChatServiceImpl implements ChatService {
 
     private final ChatRepository chatRepository;
     private final CustomerRepository customerRepository;
-    private final AdministratorRepository administratorRepository;
+    private final UserRoleRepository administratorRepository;
     private final MessageRepository messageRepository;
 
     @Override
@@ -44,13 +44,13 @@ public class ChatServiceImpl implements ChatService {
 
         Chat savedChat = chatRepository.save(chat);
 
-        Administrator administrator = new Administrator();
-        administrator.setId(UUID.randomUUID());
-        administrator.setUserId(chat.getCreatorId());
-        administrator.setChatId(chat.getId());
-        administrator.setUserType(Administrator.UserType.ADMINISTRATOR);
+        UserRole userRole = new UserRole();
+        userRole.setId(UUID.randomUUID());
+        userRole.setUserId(chat.getCreatorId());
+        userRole.setChatId(chat.getId());
+        userRole.setUserType(UserRole.UserType.ADMINISTRATOR);
 
-        administratorRepository.save(administrator);
+        administratorRepository.save(userRole);
 
         return savedChat;
     }
@@ -64,17 +64,14 @@ public class ChatServiceImpl implements ChatService {
         return chatRepository.save(chat);
     }
 
-    //@TODO WARN create private method which could be used with leaveChat
     @Override
     @Transactional
     public void removeCustomerFromChat(UUID customerId, UUID chatId) {
         Customer customer = findCustomerById(customerId);
         Chat chat = findById(chatId);
-        chat.getMembers().remove(customer);
-        messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.iam);
-        messageRepository.deleteAllBySenderAndChatAndType(customerId, chatId, Message.MessageType.iam);
-        messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.hello);
-        administratorRepository.deleteByUserIdAndChatId(customerId, chatId);
+
+        removeUserFromMembersAndDeleteRoleInChatIfExist(chat, customer);
+        performDefaultDeletionOfMessages(chatId, customerId);
 
         chatRepository.save(chat);
     }
@@ -85,22 +82,34 @@ public class ChatServiceImpl implements ChatService {
         Chat chat = findById(chatId);
         Customer customer = findCustomerById(customerId);
 
+        removeUserFromMembersAndDeleteRoleInChatIfExist(chat, customer);
+
         if (withDeleteMessages) {
             messageRepository.deleteAllByReceiverAndSenderAndChat(customerId, customerId, chatId);
         } else {
-            messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.iam);
-            messageRepository.deleteAllBySenderAndChatAndType(customerId, chatId, Message.MessageType.iam);
-            messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.hello);
+            performDefaultDeletionOfMessages(chatId, customerId);
         }
+    }
+
+    private void removeUserFromMembersAndDeleteRoleInChatIfExist(Chat chat, Customer customer) {
+        UUID chatId = chat.getId();
+        UUID customerId = customer.getId();
 
         chat.getMembers().remove(customer);
         chatRepository.save(chat);
 
         if (administratorRepository.findByUserIdAndChatId(customerId, chatId).isPresent()) {
-            administratorRepository.deleteByUserIdAndChatId(customerId, chatId);
+            administratorRepository.deleteAllByUserIdAndChatId(customerId, chatId);
             assignRolesToOtherUsersOfChat(chat);
         }
     }
+
+    private void performDefaultDeletionOfMessages(UUID chatId, UUID customerId) {
+        messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.IAM);
+        messageRepository.deleteAllBySenderAndChatAndType(customerId, chatId, Message.MessageType.IAM);
+        messageRepository.deleteAllByReceiverAndChatAndType(customerId, chatId, Message.MessageType.HELLO);
+    }
+
 
     private Customer findCustomerById(UUID uuid) {
         return customerRepository
@@ -109,26 +118,27 @@ public class ChatServiceImpl implements ChatService {
     }
 
     private void assignRolesToOtherUsersOfChat(Chat chat) {
-        List<Administrator> administratorList = administratorRepository.findAllByChatId(chat.getId());
+        List<UserRole> userRoles = administratorRepository.findAllByChatId(chat.getId());
 
-        List<Administrator> listWithUserTypeAdmin = administratorList
+        List<UserRole> listWithUserTypeAdmin = userRoles
                 .stream()
-                .filter(item -> item.getUserType().equals(Administrator.UserType.ADMINISTRATOR))
+                .filter(item -> item.getUserType().equals(UserRole.UserType.ADMINISTRATOR))
                 .toList();
 
         if (listWithUserTypeAdmin.size() == 0) {
-            if (administratorList.size() != 0) {
-                administratorList.forEach(item -> item.setUserType(Administrator.UserType.ADMINISTRATOR));
+            if (userRoles.size() != 0) {
+                userRoles.forEach(item -> item.setUserType(UserRole.UserType.ADMINISTRATOR));
             } else {
                 administratorRepository.deleteAllByChatId(chat.getId());
                 Set<Customer> members = chat.getMembers();
-                Set<Administrator> administrators = new HashSet<>();
+                Set<UserRole> administrators = new HashSet<>();
+
                 for (Customer member : members) {
-                    Administrator administrator = Administrator.builder()
+                    UserRole administrator = UserRole.builder()
                             .id(UUID.randomUUID())
                             .chatId(chat.getId())
                             .userId(member.getId())
-                            .userType(Administrator.UserType.ADMINISTRATOR)
+                            .userType(UserRole.UserType.ADMINISTRATOR)
                             .build();
 
                     administrators.add(administrator);

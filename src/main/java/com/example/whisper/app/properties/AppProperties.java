@@ -1,4 +1,4 @@
-package com.example.whisper.app_properties;
+package com.example.whisper.app.properties;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,0 +1,30 @@
+app:
+  init-props:
+    is_recreate_server_user_needed: true
+    key-rsa-size: 2048
+  message:
+    lifespan: 86400000
+    #    lifespan: 10000
+    path_to_attachments_folder: "/var/chat/attachments/"
+
+server:
+  error:
+    include-message: always
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306/whisper
+    username: root
+    password:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+      naming.physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+    database-platform: org.hibernate.dialect.MariaDB103Dialect
+    show-sql: true
+
+web:
+  socket:
+    message-size-limit: 200000
+    send-time-limit: 200000
+    send-buffer-size-limit: 1572864

@@ -1,7 +1,7 @@
 package com.example.whisper.service.aop;
 
-import com.example.whisper.entity.Administrator;
-import com.example.whisper.repository.AdministratorRepository;
+import com.example.whisper.entity.UserRole;
+import com.example.whisper.repository.UserRoleRepository;
 import com.example.whisper.service.util.DecoderUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.UUID;
 public class SecurityService {
 
     private final DecoderUtil decoderUtil;
-    private final AdministratorRepository administratorRepository;
+    private final UserRoleRepository administratorRepository;
 
     public boolean isOwner(String token, UUID ownerId) {
         UUID decryptUUID = UUID.fromString(decoderUtil.decryptToken(token, ownerId));
@@ -38,11 +38,11 @@ public class SecurityService {
             return false;
         }
 
-        Administrator administrator = administratorRepository
+        UserRole userRole = administratorRepository
                 .findByUserIdAndChatId(getSenderIdFromToken(token), chatId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "User has no role in chat!"));
 
-        return roles.contains(administrator.getUserType().name());
+        return roles.contains(userRole.getUserType().name());
     }
 
     private boolean isValidToken(String token) {

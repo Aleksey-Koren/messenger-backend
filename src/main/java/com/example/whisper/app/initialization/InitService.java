@@ -1,4 +1,4 @@
-package com.example.whisper.initialization;
+package com.example.whisper.app.initialization;
 
 import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Utility;

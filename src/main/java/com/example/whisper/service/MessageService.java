@@ -1,5 +1,6 @@
 package com.example.whisper.service;
 
+import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,12 @@ public interface MessageService {
 
     void sendMessage(List<Message> messages);
 
+
     List<Message> findOld();
+
+    List<Message> getChatsByReceiverId(UUID receiver);
+
+    List<Customer> getParticipantsByCharId(UUID chatId);
 
     void deleteAll(List<Message> messages);
 }

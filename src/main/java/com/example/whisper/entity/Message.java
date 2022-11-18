@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
@@ -24,15 +25,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table(name = "message")
 @ToString
+@FieldNameConstants
 public class Message {
 
-    //@TODO INFO all should be in uppercase
     public enum MessageType {
-        hello, //0
-        iam, //1
-        whisper, //2
-        who, //3
-        server,
+        HELLO, //0
+        IAM, //1
+        WHISPER, //2
+        WHO, //3
+        SERVER,
         LEAVE_CHAT,
         ASSIGN_ROLE,
     }
@@ -57,12 +58,10 @@ public class Message {
     @NotNull
     private MessageType type;
 
-    //@TODO WARN - what is it number
-    @Column(length = 344)
+    @Column(length = 2048)
     private String data;
 
     private String attachments;
-    //@TODO WARN - what is it number
     @Column(length = 361)
     private String nonce;
 

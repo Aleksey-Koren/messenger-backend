@@ -1,6 +1,6 @@
-package com.example.whisper.initialization;
+package com.example.whisper.app.initialization;
 
-import com.example.whisper.app_properties.AppProperties;
+import com.example.whisper.app.properties.AppProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
