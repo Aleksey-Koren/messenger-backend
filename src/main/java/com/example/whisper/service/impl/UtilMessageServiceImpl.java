@@ -22,6 +22,7 @@ public class UtilMessageServiceImpl implements UtilMessageService {
     private final MessageRepository messageRepository;
     private final FileServiceImpl fileService;
 
+    // TODO: add check for bot existence and send bot to this
     public List<Message> processMessages(List<Message> messages) {
         setInstantData(messages);
 

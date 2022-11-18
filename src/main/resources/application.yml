@@ -14,7 +14,7 @@ spring:
   datasource:
     url: jdbc:mariadb://localhost:3307/whisper
     username: root
-    password: 27072001
+    password: 994499_ma
   jpa:
     open-in-view: false
     hibernate:
@@ -22,6 +22,13 @@ spring:
       naming.physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
     database-platform: org.hibernate.dialect.MariaDB103Dialect
     show-sql: true
+  cloud:
+    stream:
+      bindings:
+        output:
+          destination: queue.bot.messages
+  rabbitmq:
+    addresses: localhost
 
 web:
   socket:
