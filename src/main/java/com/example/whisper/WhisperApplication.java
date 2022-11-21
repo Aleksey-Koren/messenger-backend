@@ -6,12 +6,9 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.example.whisper.service.producer.MessageProducerChannels;
-
 @SpringBootApplication
 @EnableScheduling
-@EnableBinding(MessageProducerChannels.class)
-@IntegrationComponentScan
+// @IntegrationComponentScan
 public class WhisperApplication {
 
     public static void main(String[] args) {

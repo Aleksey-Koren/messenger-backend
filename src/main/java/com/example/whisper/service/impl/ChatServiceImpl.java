@@ -1,11 +1,13 @@
 package com.example.whisper.service.impl;
 
 import com.example.whisper.entity.Administrator;
+import com.example.whisper.entity.Bot;
 import com.example.whisper.entity.Chat;
 import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Message;
 import com.example.whisper.exceptions.ResourseNotFoundException;
 import com.example.whisper.repository.AdministratorRepository;
+import com.example.whisper.repository.BotRepository;
 import com.example.whisper.repository.ChatRepository;
 import com.example.whisper.repository.CustomerRepository;
 import com.example.whisper.repository.MessageRepository;
@@ -27,6 +29,7 @@ public class ChatServiceImpl implements ChatService {
 
     private final ChatRepository chatRepository;
     private final CustomerRepository customerRepository;
+    private final BotRepository botRepository;
     private final AdministratorRepository administratorRepository;
     private final MessageRepository messageRepository;
 
@@ -105,6 +108,19 @@ public class ChatServiceImpl implements ChatService {
         return customerRepository
                 .findById(uuid)
                 .orElseThrow(() -> new ResourseNotFoundException("Customer not found by id!"));
+    }
+
+    // TODO: replace Bot with UUID type
+    public List<UUID> findChatBots(UUID chatId) {
+        return chatRepository.findById(chatId)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid chat id"))
+            .getMembers()
+            .stream()
+            .filter(Bot.class::isInstance)
+            .map(Bot.class::cast)
+            .map(Bot::getId)
+            .toList();
+            
     }
 
     private void assignRolesToOtherUsersOfChat(Chat chat) {

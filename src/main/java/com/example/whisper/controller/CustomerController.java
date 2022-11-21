@@ -41,6 +41,7 @@ public class CustomerController {
 
     @GetMapping("{id}")
     public ResponseEntity<Customer> getCustomer(@PathVariable("id") UUID id) {
+        log.info("response entity with customer: " + new ResponseEntity<>(customerService.findById(id), HttpStatus.OK).toString());
         return new ResponseEntity<>(customerService.findById(id), HttpStatus.OK);
     }
 
