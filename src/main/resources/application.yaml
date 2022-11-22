@@ -25,6 +25,6 @@ spring:
 
 web:
   socket:
-    message-size-limit: 200000
+    message-size-limit: 10000000
     send-time-limit: 200000
     send-buffer-size-limit: 1572864
