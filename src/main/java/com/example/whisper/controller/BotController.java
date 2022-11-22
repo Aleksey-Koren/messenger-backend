@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.whisper.entity.Bot;
 import com.example.whisper.entity.Chat;
 import com.example.whisper.entity.Customer;
+import com.example.whisper.entity.Message;
 import com.example.whisper.service.BotService;
 import com.example.whisper.service.ChatService;
 import com.example.whisper.service.CustomerService;
@@ -28,6 +29,12 @@ public record BotController(
     CustomerService customerServie, 
     BotService botService, 
     ChatServiceImpl chatService) {
+
+    @PostMapping
+    public Message getMessage(Message message) {
+        log.info("Yuhuuuu, I've received message: " + message);
+        return message;
+    }
 
     // @GetMapping 
     // ResponseEntity<String> getMessage() {
