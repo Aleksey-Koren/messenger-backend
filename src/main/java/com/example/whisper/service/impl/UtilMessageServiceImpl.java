@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -21,7 +22,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@EnableBinding(Source.class)
+@EnableBinding(Processor.class)
 @Slf4j
 @RequiredArgsConstructor
 public class UtilMessageServiceImpl implements UtilMessageService {
@@ -29,7 +30,7 @@ public class UtilMessageServiceImpl implements UtilMessageService {
     private final MessageRepository messageRepository;
     private final FileServiceImpl fileService;
     private final ChatServiceImpl chatServiceImpl;
-    private final Source source;
+    private final Processor processor;
 
     public List<Message> processMessages(List<Message> messages) {
         setInstantData(messages);
@@ -41,7 +42,7 @@ public class UtilMessageServiceImpl implements UtilMessageService {
             .stream()
             .filter(message -> botsInCurrentChat.contains(message.getReceiver()))
             .forEach(message -> {
-                MessageChannel output = source.output();
+                MessageChannel output = processor.output();
                 output.send(MessageBuilder
                     .withPayload(message)
                     .build());

@@ -6,7 +6,6 @@ app:
     lifespan: 86400000
     #    lifespan: 10000
     path_to_attachments_folder: "C:\\wsp-attachments"
-
 server:
   error:
     include-message: always
@@ -27,6 +26,8 @@ spring:
   cloud:
     stream:
       bindings:
+        input:
+          destination: queue.bot.messages
         output:
           destination: queue.bot.messages
   rabbitmq:
