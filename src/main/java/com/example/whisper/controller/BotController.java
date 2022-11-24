@@ -36,24 +36,21 @@ public record BotController(
     BotService botService, 
     ChatServiceImpl chatService) {
 
-    private static final String SOURCE_APPLICATION_URL = "http://localhost:8080/";
+    private static final String BOT_APPLICATION_URL = "http://localhost:8081/";
+
+    @PostMapping
+    public Message getMessage(Message message) {
+        log.info("Yuhuuuu, I've received message: " + message);
+        return message;
+    }
 
     @StreamListener(target = Processor.INPUT)
-    public void respond(Message message) {
-        log.info(Processor.class + " works fine");
-        // Message newMessage = new Message();
-        // HttpEntity<Message> request = new HttpEntity<>(newMessage);
-        // RestTemplate restTemplate = new RestTemplate();
-        // String botUrl = SOURCE_APPLICATION_URL + "bots";
-        // restTemplate.postForEntity(botUrl, request, Message.class, "");
+	public void respond(Message message) {
+        HttpEntity<Message> request = new HttpEntity<>(message);
+        RestTemplate restTemplate = new RestTemplate();
+        String botUrl = BOT_APPLICATION_URL + "messages";
+        restTemplate.postForEntity(botUrl, request, Message.class, "");
 	}
-
-    // @PostMapping
-    // public Message getMessage(Message message) {
-    //     log.info("Yuhuuuu, I've received message: " + message);
-    //     return message;
-    // }
-
     // @GetMapping 
     // ResponseEntity<String> getMessage() {
     //     String message = "Some message";
