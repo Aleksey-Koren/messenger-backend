@@ -110,7 +110,6 @@ public class ChatServiceImpl implements ChatService {
                 .orElseThrow(() -> new ResourseNotFoundException("Customer not found by id!"));
     }
 
-    // TODO: replace Bot with UUID type
     public List<UUID> findChatBots(UUID chatId) {
         return chatRepository.findById(chatId)
             .orElseThrow(() -> new IllegalArgumentException("Invalid chat id"))

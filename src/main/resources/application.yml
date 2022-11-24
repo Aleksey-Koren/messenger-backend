@@ -27,6 +27,8 @@ spring:
   cloud:
     stream:
       bindings:
+        input:
+          destination: queue.bot.messages
         output:
           destination: queue.bot.messages
   rabbitmq:

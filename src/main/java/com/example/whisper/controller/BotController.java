@@ -4,12 +4,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.cloud.stream.messaging.Processor;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.example.whisper.entity.Bot;
 import com.example.whisper.entity.Chat;
@@ -24,11 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/bots")
+@EnableBinding(Processor.class)
 @Slf4j
 public record BotController(
     CustomerService customerServie, 
     BotService botService, 
     ChatServiceImpl chatService) {
+
+    private static final String BOT_APPLICATION_URL = "http://localhost:8081/";
 
     @PostMapping
     public Message getMessage(Message message) {
@@ -36,6 +44,13 @@ public record BotController(
         return message;
     }
 
+    @StreamListener(target = Processor.INPUT)
+	public void respond(Message message) {
+        HttpEntity<Message> request = new HttpEntity<>(message);
+        RestTemplate restTemplate = new RestTemplate();
+        String botUrl = BOT_APPLICATION_URL + "messages";
+        restTemplate.postForEntity(botUrl, request, Message.class, "");
+	}
     // @GetMapping 
     // ResponseEntity<String> getMessage() {
     //     String message = "Some message";
