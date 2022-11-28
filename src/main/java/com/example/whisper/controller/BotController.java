@@ -23,7 +23,9 @@ import com.example.whisper.entity.Message;
 import com.example.whisper.service.BotService;
 import com.example.whisper.service.ChatService;
 import com.example.whisper.service.CustomerService;
+import com.example.whisper.service.MessageService;
 import com.example.whisper.service.impl.ChatServiceImpl;
+import com.example.whisper.service.util.DecoderUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +36,9 @@ import lombok.extern.slf4j.Slf4j;
 public record BotController(
     CustomerService customerServie, 
     BotService botService, 
-    ChatServiceImpl chatService) {
+    ChatServiceImpl chatService,
+    DecoderUtil decoderUtil,
+    MessageService messageService) {
 
     private static final String BOT_APPLICATION_URL = "http://localhost:8081/";
 
@@ -48,7 +52,7 @@ public record BotController(
 	public void respond(Message message) {
         HttpEntity<Message> request = new HttpEntity<>(message);
         RestTemplate restTemplate = new RestTemplate();
-        String botUrl = BOT_APPLICATION_URL + "messages";
+        String botUrl = BOT_APPLICATION_URL + "bot/messages";
         restTemplate.postForEntity(botUrl, request, Message.class, "");
 	}
     // @GetMapping 
@@ -91,4 +95,11 @@ public record BotController(
     //     return allCustomers;
     // }
 
+    @GetMapping
+    public String decryptThisFuckingMessage() {
+        UUID id = UUID.fromString("d5ba221a-b388-4f6e-a100-bdce80957460");
+        Message message = messageService.findById(id);
+        String decryptedText = decoderUtil.decryptSecretText(message.getSender(), message.getData(), message.getNonce());
+        return null;
+    }
 }

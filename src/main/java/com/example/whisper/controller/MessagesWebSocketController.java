@@ -47,7 +47,6 @@ public class MessagesWebSocketController {
     }
 
 
-    // TODO: add check for bot existence and send bot to this
     @MessageMapping("/chat/send-message/{iam}")
     public void sendChatMessage(@Payload List<Message> messages, @DestinationVariable UUID iam) {
 

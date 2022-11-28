@@ -196,4 +196,12 @@ public class MessageServiceImpl implements MessageService {
         messageRepository.deleteAll(messages);
     }
 
+    @Override
+    public Message findById(UUID id) {
+        return messageRepository
+            .findById(id)
+            .orElseThrow();
+    }
+
+    
 }

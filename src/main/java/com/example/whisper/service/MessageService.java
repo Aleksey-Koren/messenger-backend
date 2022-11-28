@@ -22,4 +22,6 @@ public interface MessageService {
     List<Message> findOld();
 
     void deleteAll(List<Message> messages);
+
+    Message findById(UUID id);
 }
