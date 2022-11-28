@@ -22,7 +22,7 @@ services:
       - 8000:8080
   
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    image: rabbitmq:3.8-management-alpine
     container_name: rabbitmq_container
     ports:
       - 5672:5672
