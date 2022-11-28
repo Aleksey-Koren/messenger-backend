@@ -77,7 +77,8 @@ public class DecoderUtil {
         return decrypt(secretText, sender.getPk(), secretKey.getUtilValue(), nonce);
     }
 
-    private String decrypt(String input, String publicKeyPem, String privateKeyPem, String nonce) {
+    // TODO: make it private
+    public String decrypt(String input, String publicKeyPem, String privateKeyPem, String nonce) {
         Base64.Decoder decoder = Base64.getDecoder();
         byte[] inputBytes = decoder.decode(input);
 

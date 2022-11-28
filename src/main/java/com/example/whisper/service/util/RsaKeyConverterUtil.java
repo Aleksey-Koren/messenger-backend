@@ -1,12 +1,19 @@
 package com.example.whisper.service.util;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -81,8 +88,8 @@ public class RsaKeyConverterUtil {
                 .replace(END_PRIVATE_KEY, "");
 
         PKCS8EncodedKeySpec encodedKeySpec = getKeySpecFromPrivatePem(clearPrivatePem);
-
         try {
+            Security.addProvider(new BouncyCastleProvider());
             return KeyFactory.getInstance("RSA").generatePrivate(encodedKeySpec);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
