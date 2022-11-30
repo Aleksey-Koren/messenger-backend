@@ -70,6 +70,7 @@ public class MessagesWebSocketController {
         // messageRepository.save(message);
 
         // messages.add(message);
+        log.info("incoming messages: {}", messages);
 
         messageService.sendMessage(messages);
 

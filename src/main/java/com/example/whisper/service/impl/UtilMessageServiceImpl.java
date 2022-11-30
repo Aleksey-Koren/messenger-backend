@@ -32,6 +32,7 @@ public class UtilMessageServiceImpl implements UtilMessageService {
     private final ChatServiceImpl chatServiceImpl;
     private final Processor processor;
 
+    
     public List<Message> processMessages(List<Message> messages) {
         setInstantData(messages);
 
