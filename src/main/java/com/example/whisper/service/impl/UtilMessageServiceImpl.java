@@ -1,5 +1,6 @@
 package com.example.whisper.service.impl;
 
+import com.example.whisper.entity.File;
 import com.example.whisper.entity.Message;
 import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.UtilMessageService;
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,10 +29,32 @@ public class UtilMessageServiceImpl implements UtilMessageService {
         MessageHelperUtil.setInstantData(messages);
 
         Message controlMessage = messages.get(0);
-        if (controlMessage.getAttachments() == null || "".equals(controlMessage.getAttachments())) {
+//        if (controlMessage.getAttachments() == null || "".equals(controlMessage.getAttachments())) {
+//            return messageRepository.saveAll(messages);
+//        } else {
+//            return messageRepository.saveAll(processAttachments(messages));
+//        }
+
+        if (controlMessage.getFiles().size() == 0) {
+
             return messageRepository.saveAll(messages);
         } else {
-            return messageRepository.saveAll(processAttachments(messages));
+            List<Message> messageList = processAttachments(messages);
+            messages.forEach(message -> {
+                AtomicInteger index = new AtomicInteger();
+                message.getFiles().forEach(file -> {
+                    file.setId(UUID.randomUUID());
+                    file.setData(null);
+                    file.setMessage(message);
+                    file.setNumber(String.valueOf(index.get()));
+                    index.getAndIncrement();
+                });
+            });
+
+//            return messageRepository.saveAll(messages);
+
+            return messageRepository.saveAll(messageList);
+
         }
     }
 
@@ -38,18 +64,19 @@ public class UtilMessageServiceImpl implements UtilMessageService {
 
     private Message processMessage(Message message) {
         String folderPath = fileService.retrieveFolderPath(message.getId());
-        String[] files = message.getAttachments().split(";");
+//        String[] files = message.getAttachments().split(";");
+        Set<File> files = message.getFiles();
 
         fileService.createDirectories(Paths.get(folderPath));
-        fileService.saveFiles(folderPath, files);
+        fileService.saveFilesNew(folderPath, files);
 
         message.setAttachments(retrieveAttachmentsString(files));
         return message;
     }
 
-    private String retrieveAttachmentsString(String[] files) {
+    private String retrieveAttachmentsString(Set<File> files) {
         List<String> indexes = new ArrayList<>();
-        for (int i = 0; i < files.length; i++) {
+        for (int i = 0; i < files.size(); i++) {
             indexes.add(String.valueOf(i));
         }
         return String.join(";", indexes);

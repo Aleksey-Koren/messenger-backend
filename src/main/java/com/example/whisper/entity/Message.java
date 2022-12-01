@@ -1,5 +1,6 @@
 package com.example.whisper.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,14 +9,20 @@ import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.Type;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -35,7 +42,6 @@ public class Message {
         WHO, //3
         SERVER,
         LEAVE_CHAT,
-        ASSIGN_ROLE,
     }
 
     @Id
@@ -62,6 +68,11 @@ public class Message {
     private String data;
 
     private String attachments;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<File> files = new HashSet<>();
+
     @Column(length = 361)
     private String nonce;
 

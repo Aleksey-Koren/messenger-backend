@@ -1,5 +1,6 @@
 package com.example.whisper.service.impl;
 
+import com.example.whisper.entity.File;
 import com.example.whisper.entity.Message;
 import com.example.whisper.exceptions.ServiceException;
 import com.example.whisper.service.FileService;
@@ -16,6 +17,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -66,6 +68,20 @@ public class FileServiceImpl implements FileService {
     @Override
     public void saveFiles(String folderPath, String[] files) {
         List<byte[]> filesAsBytes = Arrays.stream(files).map(s -> Base64.getDecoder().decode(s)).toList();
+        for (byte[] arr : filesAsBytes) {
+            String filePath = folderPath + SEPARATOR + filesAsBytes.indexOf(arr);
+            try {
+                Files.write(Paths.get(filePath), arr, StandardOpenOption.CREATE_NEW);
+            } catch (IOException e) {
+                String eMessage = "Troubles with file creation";
+                log.warn(eMessage);
+                throw new ServiceException(eMessage, e);
+            }
+        }
+    }
+
+    public void saveFilesNew(String folderPath, Set<File> files) {
+        List<byte[]> filesAsBytes = files.stream().map(file -> Base64.getDecoder().decode(file.getData())).toList();
         for (byte[] arr : filesAsBytes) {
             String filePath = folderPath + SEPARATOR + filesAsBytes.indexOf(arr);
             try {

@@ -68,7 +68,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void sendMessage(List<Message> messages) {
-        if (!MessageValidator.isValid(messages)) {
+        if (MessageValidator.isNotValid(messages)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 

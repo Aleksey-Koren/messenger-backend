@@ -1,6 +1,10 @@
 package com.example.whisper.controller;
 
+import com.example.whisper.dto.FileDto;
 import com.example.whisper.dto.FileStreamDto;
+import com.example.whisper.entity.File;
+import com.example.whisper.exceptions.ResourseNotFoundException;
+import com.example.whisper.repository.FileRepository;
 import com.example.whisper.service.impl.AttachmentsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
