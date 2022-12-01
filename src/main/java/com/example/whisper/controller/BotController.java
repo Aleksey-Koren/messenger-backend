@@ -1,8 +1,8 @@
 package com.example.whisper.controller;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
+
+import javax.validation.Valid;
 
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -10,42 +10,33 @@ import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.whisper.entity.Bot;
-import com.example.whisper.entity.Chat;
-import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Message;
 import com.example.whisper.service.BotService;
-import com.example.whisper.service.ChatService;
-import com.example.whisper.service.CustomerService;
 import com.example.whisper.service.MessageService;
-import com.example.whisper.service.impl.ChatServiceImpl;
-import com.example.whisper.service.util.DecoderUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/bots")
 @EnableBinding(Processor.class)
-@Slf4j
 public record BotController(
-    CustomerService customerServie, 
-    BotService botService, 
-    ChatServiceImpl chatService,
-    DecoderUtil decoderUtil,
-    MessageService messageService) {
+    MessageService messageService,
+    BotService botService
+) {
 
     private static final String BOT_APPLICATION_URL = "http://localhost:8081/";
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    @PostMapping
+    public ResponseEntity<Bot> register(@RequestBody @Valid Bot bot) {
+        return new ResponseEntity<>(botService.register(bot), HttpStatus.CREATED);
+    }
 
     @StreamListener(target = Processor.INPUT)
 	public void respond(Message message) {
@@ -61,6 +52,5 @@ public record BotController(
 
         List<Message> messages = response.getBody();
         messageService.sendMessage(messages);
-        // messageService.sendMessage(messages);
 	}
 }

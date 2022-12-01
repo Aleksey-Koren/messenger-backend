@@ -50,6 +50,7 @@ public class MessagesWebSocketController {
     @MessageMapping("/chat/send-message/{iam}")
     public void sendChatMessage(@Payload List<Message> messages, @DestinationVariable UUID iam) {
 
+        // TODO: replace this with normal methods
         // Bot bot = new Bot();
         // bot.setId(UUID.randomUUID());
         // bot.setPk("sdfsfsdfd");
@@ -70,7 +71,6 @@ public class MessagesWebSocketController {
         // messageRepository.save(message);
 
         // messages.add(message);
-        log.info("incoming messages: {}", messages);
 
         messageService.sendMessage(messages);
 
