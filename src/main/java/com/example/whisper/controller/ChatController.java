@@ -1,5 +1,6 @@
 package com.example.whisper.controller;
 
+import com.example.whisper.entity.Chat;
 import com.example.whisper.entity.Customer;
 import com.example.whisper.entity.Message;
 import com.example.whisper.repository.CustomerRepository;
@@ -35,6 +36,11 @@ public class ChatController {
     @GetMapping()
     public List<Message> getChats(@RequestParam("receiver") UUID receiver) {
         return messageService.findChats(receiver);
+    }
+
+    @GetMapping("/{chatId}")
+    public Chat getChat(@PathVariable UUID chatId) {
+        return chatService.findById(chatId);
     }
 
     @GetMapping("{id}/participants")

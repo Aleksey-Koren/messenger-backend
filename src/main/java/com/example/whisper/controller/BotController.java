@@ -23,6 +23,10 @@ import com.example.whisper.entity.Message;
 import com.example.whisper.service.BotService;
 import com.example.whisper.service.MessageService;
 
+import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/bots")
 @EnableBinding(Processor.class)
@@ -31,18 +35,19 @@ public record BotController(
     BotService botService
 ) {
 
-    private static final String BOT_APPLICATION_URL = "http://localhost:8081/";
-
     @PostMapping
     public ResponseEntity<Bot> register(@RequestBody @Valid Bot bot) {
+        log.info("Registering bot: {}", bot);
         return new ResponseEntity<>(botService.register(bot), HttpStatus.CREATED);
     }
 
     @StreamListener(target = Processor.INPUT)
 	public void respond(Message message) {
+        Bot bot = botService.findById(message.getReceiver());
+
         HttpEntity<Message> request = new HttpEntity<>(message);
         RestTemplate restTemplate = new RestTemplate();
-        String botUrl = BOT_APPLICATION_URL + "bot/messages";
+        String botUrl = bot.getWebhookUrl() + "messages";
         ResponseEntity<List<Message>> response = restTemplate.exchange(
             botUrl, 
             HttpMethod.POST, 

@@ -3,6 +3,8 @@ package com.example.whisper.service.impl;
 import com.example.whisper.app_properties.MessageProperties;
 import com.example.whisper.entity.Chat;
 import com.example.whisper.entity.Message;
+import com.example.whisper.entity.Message.MessageType;
+import com.example.whisper.exceptions.ResourseNotFoundException;
 import com.example.whisper.repository.MessageRepository;
 import com.example.whisper.service.ChatService;
 import com.example.whisper.service.MessageService;
@@ -23,6 +25,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -201,6 +204,14 @@ public class MessageServiceImpl implements MessageService {
         return messageRepository
             .findById(id)
             .orElseThrow();
+    }
+
+    public Message findByChatIdAndReceiverId(UUID chatId, UUID recieverId) {
+        return messageRepository.findAllByChatAndType(chatId, MessageType.hello)
+            .stream()
+            .filter(message -> Objects.equals(message.getReceiver(), recieverId))
+            .findFirst()
+            .orElseThrow(() -> new ResourseNotFoundException("Hello message for receiver wasn't found"));
     }
 
     

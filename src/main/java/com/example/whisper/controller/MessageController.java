@@ -3,6 +3,8 @@ package com.example.whisper.controller;
 import com.example.whisper.entity.Message;
 import com.example.whisper.service.impl.FileServiceImpl;
 import com.example.whisper.service.impl.MessageServiceImpl;
+
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("messages")
+@RequestMapping("/messages")
 @RequiredArgsConstructor
 public class MessageController {
 
@@ -40,7 +42,7 @@ public class MessageController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<Page<Message>> getMessages(
             @RequestParam("receiver") UUID receiver,
             @RequestParam(name = "created", required = false) Instant created,
@@ -53,6 +55,13 @@ public class MessageController {
                 messageService.findAllByParams(receiver, created, before, type, chat, pageable),
                 HttpStatus.OK);
     }
+
+
+    @GetMapping("/hello")
+    public ResponseEntity<Message> getHelloMessagesByChatIdAndReceiverId(@RequestParam("chat") UUID chatId, @RequestParam("receiver") UUID recieverId) {
+        return ResponseEntity.ok(messageService.findByChatIdAndReceiverId(chatId, recieverId));
+    }
+ 
 
     @Scheduled(fixedDelayString = "#{@messageProperties.getLifespan()}")
     public void deleteOld() {

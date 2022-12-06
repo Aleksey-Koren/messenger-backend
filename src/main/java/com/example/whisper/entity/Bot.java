@@ -1,8 +1,7 @@
 package com.example.whisper.entity;
 
-import java.net.URL;
-
 import javax.persistence.Entity;
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -19,5 +18,6 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class Bot extends Customer {
-    private String webhook;
+    @NotNull
+    private String webhookUrl;
 }
