@@ -37,13 +37,15 @@ public record BotController(
 
     @PostMapping
     public ResponseEntity<Bot> register(@RequestBody @Valid Bot bot) {
-        log.info("Registering bot: {}", bot);
-        return new ResponseEntity<>(botService.register(bot), HttpStatus.CREATED);
+        Bot registeredBot = botService.register(bot);
+        log.info("Registered bot: {}", registeredBot);
+        return new ResponseEntity<>(registeredBot, HttpStatus.CREATED);
     }
 
     @StreamListener(target = Processor.INPUT)
 	public void respond(Message message) {
         Bot bot = botService.findById(message.getReceiver());
+        log.info("{} - message for bot: {}", message, bot);
 
         HttpEntity<Message> request = new HttpEntity<>(message);
         RestTemplate restTemplate = new RestTemplate();

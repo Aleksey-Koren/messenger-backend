@@ -115,6 +115,8 @@ public class MessageServiceImpl implements MessageService {
         if (!receivers.isEmpty()) {
             messageRepository.deleteHelloMessages(controlMessage.getChat(), Message.MessageType.hello, receivers);
         }
+        
+        log.info("Bot id: {}", controlMessage.getReceiver());
         if (controlMessage.getSender().equals(controlMessage.getReceiver())) {
             Chat chat = new Chat();
             chat.setId(controlMessage.getChat());

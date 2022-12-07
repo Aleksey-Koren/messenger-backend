@@ -39,7 +39,7 @@ public class UtilMessageServiceImpl implements UtilMessageService {
         Message controlMessage = messages.get(0);
         UUID currentChatId = controlMessage.getChat();
         List<UUID> botsInCurrentChat = chatServiceImpl.findChatBots(currentChatId);
-        log.info(botsInCurrentChat.toString());
+        log.info("Chat bots: {}", botsInCurrentChat);
         messages
             .stream()
             .filter(message -> botsInCurrentChat.contains(message.getReceiver()))
