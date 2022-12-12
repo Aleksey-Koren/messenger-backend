@@ -15,7 +15,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @Entity
@@ -37,8 +36,6 @@ public class File {
 
     @NotEmpty
     private String type;
-
-//    private Integer size;
 
     private String data;
 

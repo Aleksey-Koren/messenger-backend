@@ -13,21 +13,12 @@ public class MessageValidator {
         if (isEmpty(messages)) {
             return true;
         }
-        return areFieldsCorrect(messages);
+        return areFieldsNotCorrect(messages);
     }
 
-    private static boolean areFieldsCorrect(List<Message> messages) {
+    private static boolean areFieldsNotCorrect(List<Message> messages) {
         Message controlMessage = messages.get(0);
         for (Message message : messages) {
-
-            System.out.println(isEmpty(message.getSender()));
-            System.out.println(isEmpty(message.getReceiver()));
-            System.out.println(message.getType() == null);
-            System.out.println(!message.getType().equals(controlMessage.getType()));
-            System.out.println(!message.getSender().equals(controlMessage.getSender()));
-            System.out.println(controlMessage.getChat() == null ? message.getChat() != null : !controlMessage.getChat().equals(message.getChat()));
-            System.out.println(!((controlMessage.getAttachments() != null) == (message.getAttachments() != null)));
-
             if (isEmpty(message.getSender()) ||
                     isEmpty(message.getReceiver()) ||
                     message.getType() == null ||
